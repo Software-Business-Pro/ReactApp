@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem } from "native-base";
 
 export default class Map extends Component {
+  
   render() {
     console.log(this.props);
     return (

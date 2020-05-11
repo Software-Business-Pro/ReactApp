@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Text, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { RNCamera } from 'react-native-camera';
+import { Root } from "native-base";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -10,6 +11,7 @@ import {
 } from '@react-navigation/drawer';
 import Ocr from './src/Ocr/Ocr';
 import Map from './src/Map/Map';
+import HomeScreen from './src/HomeScreen/HomeScreen';
 
 function CustomDrawerContent(props) {
   return (
@@ -39,7 +41,7 @@ function Article() {
 function MyDrawer() {
   return (
     <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}>
-      <Drawer.Screen name="Accueil"  component={Feed}/>
+      <Drawer.Screen name="Accueil"  component={HomeScreen}/>
       <Drawer.Screen name="Carte"  component={Map}/>
       <Drawer.Screen name="Ocr"  component={Ocr}/>
     </Drawer.Navigator>
@@ -60,9 +62,11 @@ export default class App extends React.Component {
   }
   render() {
       return (
-        <NavigationContainer>
-          <MyDrawer />
-        </NavigationContainer>
+        <Root>
+          <NavigationContainer>
+            <MyDrawer />
+          </NavigationContainer>
+        </Root>
       );
     
   }

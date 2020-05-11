@@ -1,14 +1,19 @@
 import * as React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { RNCamera } from 'react-native-camera';
-import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem } from "native-base";
+import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Toast } from "native-base";
 import RNTesseractOcr from 'react-native-tesseract-ocr';
 import {PermissionsAndroid} from 'react-native';
 import RNTextDetector from "react-native-text-detector";
 
 export default class Ocr extends React.Component {
 
-  requestRWPermissions= async ()=> {
+  constructor(props) {
+    super(props);
+    this.state = {textDetected: null};
+}
+
+  requestRWPermissions = async () => {
     const checkReadExternalStorage = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
     const checkWriteExternalStorage = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
     if (checkReadExternalStorage === PermissionsAndroid.RESULTS.GRANTED && checkWriteExternalStorage === PermissionsAndroid.RESULTS.GRANTED ) {
@@ -56,9 +61,20 @@ export default class Ocr extends React.Component {
     //uri = uri.replace('file://', '');
     const visionResp = await RNTextDetector.detectFromUri(uri);
     console.log('visionResp', visionResp);
+    this.setState({textDetected: visionResp});
   }
 
   render() {
+    const {textDetected} = this.state;
+    if(textDetected != null) {
+        /*Toast.show({
+          text: textDetected.shift().text,
+          buttonText: "Go",
+          duration: 5000,
+          position: "top"
+        })*/
+      alert(textDetected.shift().text);
+    }
     return (
     <Container>
       <Header>
@@ -83,7 +99,7 @@ export default class Ocr extends React.Component {
         />
         <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
           <TouchableOpacity onPress={this.requestRWPermissions.bind(this)} style={styles.capture}>
-            <Text style={{ fontSize: 14 }}> SNAP </Text>
+            <Text style={{ fontSize: 14 }}> DETECT </Text>
           </TouchableOpacity>
         </View>
       </View>
