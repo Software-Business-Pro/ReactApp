@@ -12,6 +12,7 @@ import {
 import Ocr from './src/Ocr/Ocr';
 import Map from './src/Map/Map';
 import HomeScreen from './src/HomeScreen/HomeScreen';
+import Config from "react-native-config";
 
 function CustomDrawerContent(props) {
   return (

@@ -30,7 +30,7 @@
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
       <meta-data
         android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyCfuyu192DbIvW7suGkAzwJ_wB4RSShd14"/>
+        android:value="@string/REACT_APP_MAPS_API_KEY"/>
   
       <!-- You will also only need to add this uses-libray tag -->
       <uses-library android:name="org.apache.http.legacy" android:required="false"/>
