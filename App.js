@@ -46,7 +46,7 @@ export default class App extends React.Component {
 
   async componentDidMount() {
     // Get data
-    //let res = await Api.getAllData();
+    let res = await Api.getAllData();
     //this.setState({ loading: false });
   }
 
