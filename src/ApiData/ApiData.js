@@ -32,6 +32,7 @@ class ApiData {
     //console.log(resSession);
     let sessionRes = formatXml(parseXml(resSession, "GetSessionResult"));
     let allVehicles = [];
+    // Get the session
     const iUserId = sessionRes[0]['iUserId'];
     const iSessionId = sessionRes[0]['iSessionId'];
     const iAccountId = sessionRes[0]['iAccountId'];
@@ -41,10 +42,14 @@ class ApiData {
       console.log("iUserId : " + iUserId);
       console.log("iSessionId : " + iSessionId);
       console.log("iAccountId : " + iAccountId);
-
+      // Get all the vehicles
       const resVehicles = await this.GetVehicles(iUserId, iSessionId, iAccountId);
       allVehicles = formatXml(parseXml(resVehicles, "CNTVehicle"));
       //console.log(allVehicles);
+      // Get the drivers
+      //const resDrivers = await this.GetResources(iUserId, iSessionId, iAccountId);
+      //allDrivers = formatXml(parseXml(resDrivers, "CNTResource"));
+      //console.log(resDrivers);
     }
     else
     {
@@ -52,7 +57,7 @@ class ApiData {
     }
     return {vehicles : allVehicles};
   }
-
+  // SOAP request for session
   async getSession() {
     let xmls = '<?xml version="1.0" encoding="utf-8"?>\
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\
@@ -79,7 +84,7 @@ class ApiData {
               });
     return (result);
   }
-
+  // SOAP request for vehicles
   async GetVehicles(iUserId, iSessionId, iAccountId) {
     let xmls = '<?xml version="1.0" encoding="utf-8"?>\
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\
@@ -108,8 +113,35 @@ class ApiData {
         });
     return (result);
   }
+  // SOAP request for the drivers
+  async GetResources(iUserId, iSessionId, iAccountId) {
+    let xmls = '<?xml version="1.0" encoding="utf-8"?>\
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\
+      <soap:Body>\
+        <GetResources xmlns="http://tempuri.org/">\
+          <_session>\
+            <iUserId>'+iUserId+'</iUserId>\
+            <iSessionId>'+iSessionId+'</iSessionId>\
+            <iAccountId>'+iAccountId+'</iAccountId>\
+          </_session>\
+        </GetResources>\
+      </soap:Body>\
+    </soap:Envelope>';
 
-  
+    const result = axios.post('http://webservices.hermesapps.com/ws_connect.asmx',
+        xmls,
+        {headers:
+              {
+                  'Content-Type': 'text/xml; charset=utf-8',
+                  SOAPAction: 'http://tempuri.org/GetResources'
+              }
+        }).then(res=>{
+          return res.data;
+        }).catch(err=>{
+          return err;
+        });
+    return (result);
+  }
 
 } 
 
