@@ -4,6 +4,7 @@ import { RNCamera } from 'react-native-camera';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Toast } from "native-base";
 import {PermissionsAndroid} from 'react-native';
 import RNTextDetector from "react-native-text-detector";
+import Dimensions from './Dimensions';
 
 export default class Ocr extends React.Component {
 
@@ -97,38 +98,60 @@ export default class Ocr extends React.Component {
       </Body>
       <Right />
     </Header>
-      <View style={styles.container}>
+      <View style={style.screen}>
         <RNCamera
-          style={{ flex: 1, alignItems: 'center' }}
+          style={style.camera}
           ref={ref => {
             this.camera = ref
           }}
-        />
-        <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity onPress={this.requestRWPermissions.bind(this)} style={styles.capture}>
-            <Text style={{ fontSize: 14 }}> DETECT </Text>
-          </TouchableOpacity>
-        </View>
+          notAuthorizedView={null}
+          playSoundOnCapture
+        >
+        </RNCamera>
+        <View style={style.buttonContainer}>
+            <TouchableOpacity
+              onPress={this.requestRWPermissions.bind(this)}
+              style={style.button}
+            />
+          </View>
       </View>
-      </Container>
+    </Container>
     )
   }
 }
 
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: 'black'
+const style = StyleSheet.create({
+  screen: {
+    backgroundColor: "#000000",
+    flex: 1
   },
-  capture: {
-    flex: 0,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 15,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-    margin: 20,
-  }
-})
+  camera: {
+    position: "absolute",
+    width: Dimensions.screenWidth,
+    height: Dimensions.screenHeight,
+    alignItems: "center",
+    justifyContent: "center",
+    top: 0,
+    left: 0,
+    flex: 1
+  },
+  buttonContainer: {
+    width: 80,
+    height: 80,
+    backgroundColor: "#ffffff",
+    borderRadius: 50,
+    position: "absolute",
+    bottom: 30,
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  button: {
+    width: 64,
+    height: 64,
+    backgroundColor: "#ffffff",
+    borderRadius: 32,
+    borderWidth: 4,
+    borderColor: "#000000"
+  },
+});

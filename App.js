@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, useWindowDimensions  } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { RNCamera } from 'react-native-camera';
 import { Root } from "native-base";
@@ -16,22 +16,33 @@ import HomeScreen from './src/HomeScreen/HomeScreen';
 import Api from './src/ApiData/ApiData';
 import Config from "react-native-config";
 import axios from 'axios';
+import Animated from 'react-native-reanimated';
 
-function CustomDrawerContent(props) {
+function CustomDrawerContent({ progress, ...rest }) {
+  const translateX = Animated.interpolate(progress, {
+    inputRange: [0, 1],
+    outputRange: [-100, 0],
+  });
+
   return (
-    <DrawerContentScrollView {...props} >
-      <DrawerItemList {...props} />
-      <DrawerItem label="Help" onPress={() => alert('Link to help')} />
+    <DrawerContentScrollView {...rest}>
+      <Animated.View style={{ transform: [{ translateX }] }}>
+        <DrawerItemList {...rest} />
+        <DrawerItem label="Help" onPress={() => alert('Link to help')} />
+      </Animated.View>
     </DrawerContentScrollView>
   );
 }
-
 const Drawer = createDrawerNavigator();
 
 function MyDrawer(props) {
   const apiData = props.apiData;
+  const dimensions = useWindowDimensions();
+  const isLargeScreen = dimensions.width >= 768;
   return (
-    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}>
+    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}   drawerStyle={{
+      width: dimensions.width * 0.7,
+    }}>
       <Drawer.Screen name="Accueil"  component={HomeScreen}/>
       <Drawer.Screen name="Carte"  component={props => <Map {...props} apiData={apiData.vehicles}/>}/>
       <Drawer.Screen name="Ocr"  component={Ocr}/>
