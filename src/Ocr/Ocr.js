@@ -2,7 +2,6 @@ import * as React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Toast } from "native-base";
-import RNTesseractOcr from 'react-native-tesseract-ocr';
 import {PermissionsAndroid} from 'react-native';
 import RNTextDetector from "react-native-text-detector";
 
@@ -61,20 +60,28 @@ export default class Ocr extends React.Component {
     //uri = uri.replace('file://', '');
     const visionResp = await RNTextDetector.detectFromUri(uri);
     console.log('visionResp', visionResp);
-    this.setState({textDetected: visionResp});
+    if(visionResp !== []) this.setState({textDetected: visionResp});
+    else this.setState({textDetected: [{text: ""}]});
+  }
+
+  displayText(tabText) {
+    let res = "";
+    for (const e of tabText) {
+      res += (e.text + "\n");
+    }
+    return res;
   }
 
   render() {
     const {textDetected} = this.state;
-    if(textDetected != null) {
-        /*Toast.show({
-          text: textDetected.shift().text,
-          buttonText: "Go",
-          duration: 5000,
-          position: "top"
-        })*/
-      alert(textDetected.shift().text);
-    }
+    console.log(textDetected);
+    /*Toast.show({
+      text: textDetected.shift().text,
+      buttonText: "Go",
+      duration: 5000,
+      position: "top"
+    })*/
+    if(this.state.textDetected) alert(this.displayText(textDetected));
     return (
     <Container>
       <Header>
