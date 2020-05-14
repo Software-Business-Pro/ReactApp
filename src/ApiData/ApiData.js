@@ -31,25 +31,26 @@ class ApiData {
     const resSession = await this.getSession();
     //console.log(resSession);
     let sessionRes = formatXml(parseXml(resSession, "GetSessionResult"));
+    let allVehicles = [];
     const iUserId = sessionRes[0]['iUserId'];
     const iSessionId = sessionRes[0]['iSessionId'];
     const iAccountId = sessionRes[0]['iAccountId'];
     
-    if(sessionRes.length === 1 && iUserId && iAccountId && iAccountId) {
+    if(sessionRes.length === 1 && iUserId && iSessionId && iAccountId) {
       console.log('-------------------Session OK----------------');
       console.log("iUserId : " + iUserId);
       console.log("iSessionId : " + iSessionId);
       console.log("iAccountId : " + iAccountId);
 
       const resVehicles = await this.GetVehicles(iUserId, iSessionId, iAccountId);
-      let allVehicles = formatXml(parseXml(resVehicles, "CNTVehicle"));
-      console.log(allVehicles);
+      allVehicles = formatXml(parseXml(resVehicles, "CNTVehicle"));
+      //console.log(allVehicles);
     }
     else
     {
       console.log('Erreur session');
     }
-    return resSession;
+    return {vehicles : allVehicles};
   }
 
   async getSession() {
@@ -107,6 +108,8 @@ class ApiData {
         });
     return (result);
   }
+
+  
 
 } 
 

@@ -8,10 +8,10 @@ import RNTextDetector from "react-native-text-detector";
 
 export default class Ocr extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {textDetected: null};
-}
+    constructor(props) {
+      super(props);
+      this.state = {textDetected: null};
+  }
 
   requestRWPermissions = async () => {
     const checkReadExternalStorage = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);

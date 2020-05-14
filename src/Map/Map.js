@@ -1,12 +1,26 @@
 import React, { Component } from 'react';
-import MapView from 'react-native-maps';
+import MapView, {Marker} from 'react-native-maps';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem } from "native-base";
 
 export default class Map extends Component {
   
+  createMarker(data) {
+    let markers = [];
+    let i = 0;
+    for (const vehicle of data) {
+      if(vehicle.dLocLati &&  vehicle.dLocLongi) {
+        markers.push(<Marker key={i} coordinate = {{latitude: Number(vehicle.dLocLati), longitude: Number(vehicle.dLocLongi)}}
+        pinColor = {"red"}
+        title={vehicle.iVehId}
+        description={vehicle.sLocStatus}/>);
+        i++;
+      }
+    }
+    return markers;
+  }
+
   render() {
-    console.log(this.props);
     return (
       <Container>
         <Header>
@@ -23,7 +37,9 @@ export default class Map extends Component {
           <Right />
         </Header>
         <Content>
-          <MapView style={styles.mapStyle} />
+          <MapView style={styles.mapStyle}>
+          { this.createMarker(this.props.apiData) }
+          </MapView>
         </Content>
       </Container>
     );

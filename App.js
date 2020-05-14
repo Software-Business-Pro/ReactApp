@@ -28,33 +28,37 @@ function CustomDrawerContent(props) {
 
 const Drawer = createDrawerNavigator();
 
-function MyDrawer() {
+function MyDrawer(props) {
+  const apiData = props.apiData;
   return (
     <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Accueil"  component={HomeScreen}/>
-      <Drawer.Screen name="Carte"  component={Map}/>
+      <Drawer.Screen name="Carte"  component={props => <Map {...props} apiData={apiData.vehicles}/>}/>
       <Drawer.Screen name="Ocr"  component={Ocr}/>
     </Drawer.Navigator>
   );
 }
 
 export default class App extends React.Component {
+  
   constructor(props) {
     super(props);
     this.state = { loading: true };
+    this.state = {apiData: {}};
   }
 
   async componentDidMount() {
     // Get data
-    let res = await Api.getAllData();
-    //this.setState({ loading: false });
+    let apiResult = await Api.getAllData();
+    this.setState({ apiData: apiResult });
+    this.setState({ loading: false });
   }
 
   render() {
       return (
         <Root>
           <NavigationContainer>
-            <MyDrawer />
+            <MyDrawer apiData={this.state.apiData}/>
           </NavigationContainer>
         </Root>
       );
