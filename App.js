@@ -55,13 +55,13 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { loading: true };
-    this.state = {apiData: {}};
+    this.apiData = {};
   }
 
   async componentDidMount() {
     // Get data
     let apiResult = await Api.getAllData();
-    this.setState({ apiData: apiResult });
+    this.apiData = apiResult;
     this.setState({ loading: false });
   }
 
@@ -69,7 +69,7 @@ export default class App extends React.Component {
       return (
         <Root>
           <NavigationContainer>
-            <MyDrawer apiData={this.state.apiData}/>
+            <MyDrawer apiData={this.apiData}/>
           </NavigationContainer>
         </Root>
       );
