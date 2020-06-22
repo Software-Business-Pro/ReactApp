@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import MapView, {Marker} from 'react-native-maps';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
-import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem } from "native-base";
+import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Form, Item, Picker } from "native-base";
 
 export default class Map extends Component {
   // Probably best
@@ -16,6 +16,19 @@ export default class Map extends Component {
     )
   }
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: this.props.apiData,
+      selected2: undefined
+    };
+  }
+  onValueChange2(value) {
+    this.setState({
+      selected2: value
+    }, () => {console.log(this.state.selected2)
+      this.state.selected2 == "Aucun" ? this.setState({data: this.props.apiData}) : this.setState({data: this.props.apiData.filter(v => v.sLocStatus == this.state.selected2)})});
+  }
 
   render() {
     return (
@@ -34,8 +47,28 @@ export default class Map extends Component {
           <Right />
         </Header>
         <Content>
+        <Form>
+            <Item picker>
+              <Picker
+                mode="dropdown"
+                iosIcon={<Icon name="arrow-down" />}
+                style={{ width: undefined }}
+                placeholder="Select your SIM"
+                placeholderStyle={{ color: "#bfc6ea" }}
+                placeholderIconColor="#007aff"
+                selectedValue={this.state.selected2}
+                onValueChange={this.onValueChange2.bind(this)}
+              >
+                <Picker.Item label="Aucun" value="Aucun" />
+                <Picker.Item label="Arrêt" value="Arrêt" />
+                <Picker.Item label="Moteur tournant" value="Moteur tournant" />
+                <Picker.Item label="Immobilisation" value="Immobilisation" />
+                <Picker.Item label="Conduite" value="Conduite" />
+              </Picker>
+            </Item>
+          </Form>
           <MapView style={styles.mapStyle}>
-          { this.createMarker(this.props.apiData) }
+          { this.createMarker(this.state.data) }
           </MapView>
         </Content>
       </Container>
