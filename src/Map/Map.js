@@ -2,8 +2,53 @@ import React, { Component } from 'react';
 import MapView, {Marker} from 'react-native-maps';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Form, Item, Picker } from "native-base";
+import Geolocation from '@react-native-community/geolocation';
 
 export default class Map extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: this.props.apiData,
+      selected2: undefined,
+      region :
+      {
+        longitude: 0,
+        latitude: 0,
+        longitudeDelta: 0.004,
+        latitudeDelta: 0.009
+      }
+    };
+    let watchID = null;
+  }
+
+  componentDidMount() {
+    Geolocation.getCurrentPosition(
+      (position) => {
+          console.log(position);
+          this.setState({
+              region: {
+                  longitude: position.coords.longitude,
+                  latitude: position.coords.latitude,
+                  longitudeDelta: 0.004,
+                  latitudeDelta: 0.009
+              }
+          });
+      },
+      (error) => {
+          // See error code charts below.
+          console.log(error.code, error.message);
+          throw error;
+      },
+      { 
+          showLocationDialog: true,
+          forceRequestLocation: true, 
+          enableHighAccuracy: true, 
+          timeout: 15000, 
+          maximumAge: 10000 
+      }
+    );
+  }
+
   // Probably best
   createMarker(data) {
     let i = 0;
@@ -16,13 +61,6 @@ export default class Map extends Component {
     )
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: this.props.apiData,
-      selected2: undefined
-    };
-  }
   onValueChange2(value) {
     this.setState({
       selected2: value
@@ -67,7 +105,22 @@ export default class Map extends Component {
               </Picker>
             </Item>
           </Form>
-          <MapView style={styles.mapStyle}>
+          <MapView 
+            region={this.state.region}
+            style={styles.mapStyle}
+            region = {this.state.region} 
+            onRegionChange={ 
+              region => {
+                //console.log("Region Changed");
+                //this.setState({region});
+              } }
+            onRegionChangeComplete={ 
+              region => {
+                console.log("Region change complete");
+                this.setState({region});
+              } }
+            showsUserLocation={ true } 
+          >
           { this.createMarker(this.state.data) }
           </MapView>
         </Content>
