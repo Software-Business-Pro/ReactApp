@@ -3,25 +3,35 @@ import MapView, {Marker} from 'react-native-maps';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Form, Item, Picker } from "native-base";
 import Geolocation from '@react-native-community/geolocation';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { NavigationEvents } from 'react-navigation';
+import Api from '../ApiData/ApiData';
 
-export default class Map extends Component {
+export class Map extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: this.props.apiData,
-      selected2: undefined,
-      region :
+      apiData: {},
+      region:
       {
         longitude: 0,
         latitude: 0,
         longitudeDelta: 0.004,
         latitudeDelta: 0.009
-      }
+      },
+      isLoading: true
     };
-    let watchID = null;
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    console.log("test")
+    // Get data
+    let apiResult = await Api.getAllData();
+    this.setState({ apiData: apiResult.vehicles });
+    this.setState({ isLoading: false });
+    
+
     Geolocation.getCurrentPosition(
       (position) => {
           console.log(position);
@@ -50,61 +60,57 @@ export default class Map extends Component {
   }
 
   // Probably best
-  createMarker(data) {
-    let i = 0;
-    return data.map(v =>
-      (v.dLocLati && v.dLocLongi) && 
-      (<Marker key={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}}
-        pinColor = {"red"}
-        title={v.iVehId}
-        description={v.sLocStatus}/>)
-    )
-  }
-
-  onValueChange2(value) {
-    this.setState({
-      selected2: value
-    }, () => {console.log(this.state.selected2)
-      this.state.selected2 == "Aucun" ? this.setState({data: this.props.apiData}) : this.setState({data: this.props.apiData.filter(v => v.sLocStatus == this.state.selected2)})});
+  createMarker() {
+    let filterList = "Aucun"
+    let data = null
+    if(this.props.route.params && this.props.route.params.filterList) filterList = this.props.route.params.filterList.slice(0,1)
+    
+    if(!this.state.isLoading) {
+      data = this.state.apiData
+      console.log(filterList)
+      if(filterList == "Aucun") data = this.state.apiData
+      else data = this.state.apiData.filter(v => v.sLocStatus == filterList)
+      let i = 0;
+      return data.map(v =>
+        (v.dLocLati && v.dLocLongi) && 
+        (<Marker key={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}}
+          pinColor = {"red"}
+          title={v.iVehId}
+          description={v.sLocStatus}/>)
+      )
+    }
+    else return (null)
   }
 
   render() {
+    console.log(this.props.route.params)
+    //console.log(this.state.apiData)
+    
     return (
       <Container>
         <Header>
           <Left>
             <Button
               transparent
-              onPress={() => this.props.navigation.openDrawer()}>
+              onPress={() => this.props.navigation.openDrawer()}
+            >
               <Icon name="menu" />
             </Button>
           </Left>
           <Body>
             <Title>{this.props.route.name}</Title>
           </Body>
-          <Right />
+          <Right>
+            <Button 
+              transparent
+              onPress={() =>this.props.navigation.navigate('Ocr')}
+            >
+              <Icon name='options' />
+            </Button>
+          </Right>
         </Header>
         <Content>
-        <Form>
-            <Item picker>
-              <Picker
-                mode="dropdown"
-                iosIcon={<Icon name="arrow-down" />}
-                style={{ width: undefined }}
-                placeholder="Select your SIM"
-                placeholderStyle={{ color: "#bfc6ea" }}
-                placeholderIconColor="#007aff"
-                selectedValue={this.state.selected2}
-                onValueChange={this.onValueChange2.bind(this)}
-              >
-                <Picker.Item label="Aucun" value="Aucun" />
-                <Picker.Item label="Arrêt" value="Arrêt" />
-                <Picker.Item label="Moteur tournant" value="Moteur tournant" />
-                <Picker.Item label="Immobilisation" value="Immobilisation" />
-                <Picker.Item label="Conduite" value="Conduite" />
-              </Picker>
-            </Item>
-          </Form>
+          
           <MapView 
             region={this.state.region}
             style={styles.mapStyle}
@@ -116,12 +122,12 @@ export default class Map extends Component {
               } }
             onRegionChangeComplete={ 
               region => {
-                console.log("Region change complete");
-                this.setState({region});
+                //console.log("Region change complete");
+                //this.setState({region});
               } }
             showsUserLocation={ true } 
           >
-          { this.createMarker(this.state.data) }
+          { this.createMarker() }
           </MapView>
         </Content>
       </Container>
@@ -141,3 +147,115 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height,
   },
 });
+
+class FilterMap extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selected2: undefined
+    };
+    let filterList = []
+  }
+  
+ 
+  onValueChange2(value) {
+    /*this.setState({
+      selected2: value
+    }, () => {console.log(this.state.selected2)
+      this.state.selected2 == "Aucun" ? this.setState({data: this.props.apiData}) : this.setState({data: this.props.apiData.filter(v => v.sLocStatus == this.state.selected2)})});
+    */
+   this.setState({
+    selected2: value
+    })
+    this.filterList = [value]
+  }
+
+  render() {
+    return (
+      <Container>
+        <Header>
+          <Left>
+            <Button
+              transparent
+              onPress={() => this.props.navigation.openDrawer()}
+            >
+              <Icon name="menu" />
+            </Button>
+          </Left>
+          <Body>
+            <Title>{this.props.route.name}</Title>
+          </Body>
+          <Right/>
+        </Header>
+        <Content>
+          <Form>
+              <Item picker>
+                <Picker
+                  mode="dropdown"
+                  iosIcon={<Icon name="arrow-down" />}
+                  style={{ width: undefined }}
+                  placeholder="Select your SIM"
+                  placeholderStyle={{ color: "#bfc6ea" }}
+                  placeholderIconColor="#007aff"
+                  selectedValue={this.state.selected2}
+                  onValueChange={this.onValueChange2.bind(this)}
+                >
+                  <Picker.Item label="Aucun" value="Aucun" />
+                  <Picker.Item label="Arrêt" value="Arrêt" />
+                  <Picker.Item label="Moteur tournant" value="Moteur tournant" />
+                  <Picker.Item label="Immobilisation" value="Immobilisation" />
+                  <Picker.Item label="Conduite" value="Conduite" />
+                </Picker>
+              </Item>
+            </Form>
+            <View style={{alignItems: "center", padding: 30}}>
+            <Button
+              primary
+              rounded
+              title="Submit"
+              onPress={() => {
+                /* 1. Navigate to the Details route with params */
+                this.props.navigation.navigate('Map', {
+                  filterList: this.filterList,
+               });
+              }}
+            >
+            <Text style={{color: "white", textAlign: "center", fontSize: 16, width: 135}}>Filtrer</Text>
+            </Button>
+            </View>
+        </Content>
+      </Container>
+    );
+  }
+}
+
+const Tab = createBottomTabNavigator();
+
+export default class HomeMap extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+  render() {
+    return (
+      <Tab.Navigator
+        initialRouteName="Home"
+        activeColor="#f0edf6"
+        inactiveColor="#3e2465"
+        barStyle={{ backgroundColor: '#694fad' }}
+      >
+        <Tab.Screen name="Map" component={Map} options={{
+          tabBarLabel: 'Carte',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="map" color={color} size={26} />
+          ),
+        }} />
+        <Tab.Screen name="Filter" component={FilterMap} options={{
+          tabBarLabel: 'Filtres',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="tune" color={color} size={26} />
+          ),
+        }}/>
+      </Tab.Navigator>
+    );
+  }
+}

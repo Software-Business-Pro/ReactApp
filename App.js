@@ -11,7 +11,7 @@ import {
   DrawerItem,
 } from '@react-navigation/drawer';
 import Ocr from './src/Ocr/Ocr';
-import Map from './src/Map/Map';
+import HomeMap from './src/Map/Map';
 import HomeScreen from './src/HomeScreen/HomeScreen';
 import Api from './src/ApiData/ApiData';
 import Config from "react-native-config";
@@ -44,7 +44,7 @@ function MyDrawer(props) {
       width: dimensions.width * 0.7,
     }}>
       <Drawer.Screen name="Accueil"  component={HomeScreen}/>
-      <Drawer.Screen name="Carte"  component={props => <Map {...props} apiData={apiData.vehicles}/>}/>
+      <Drawer.Screen name="Carte"  component={HomeMap}/>
       <Drawer.Screen name="Ocr"  component={Ocr}/>
     </Drawer.Navigator>
   );
@@ -58,18 +58,18 @@ export default class App extends React.Component {
     this.apiData = {};
   }
 
-  async componentDidMount() {
+  /*async componentDidMount() {
     // Get data
     let apiResult = await Api.getAllData();
     this.apiData = apiResult;
     this.setState({ loading: false });
-  }
+  }*/
 
   render() {
       return (
         <Root>
           <NavigationContainer>
-            <MyDrawer apiData={this.apiData}/>
+            <MyDrawer />
           </NavigationContainer>
         </Root>
       );
