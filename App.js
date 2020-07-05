@@ -13,6 +13,7 @@ import {
 import Ocr from './src/Ocr/Ocr';
 import HomeMap from './src/Map/Map';
 import HomeScreen from './src/HomeScreen/HomeScreen';
+import Pickertest from './src/Picker/Picker';
 import Api from './src/ApiData/ApiData';
 import Config from "react-native-config";
 import axios from 'axios';
@@ -45,6 +46,7 @@ function MyDrawer(props) {
     }}>
       <Drawer.Screen name="Accueil"  component={HomeScreen}/>
       <Drawer.Screen name="Carte"  component={HomeMap}/>
+      <Drawer.Screen name="Picker"  component={Pickertest}/>
       <Drawer.Screen name="Ocr"  component={Ocr}/>
     </Drawer.Navigator>
   );

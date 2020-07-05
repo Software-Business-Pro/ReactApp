@@ -110,7 +110,6 @@ export class Map extends Component {
           </Right>
         </Header>
         <Content>
-          
           <MapView 
             region={this.state.region}
             style={styles.mapStyle}
