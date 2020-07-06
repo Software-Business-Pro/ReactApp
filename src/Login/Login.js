@@ -1,20 +1,23 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { firebase } from '@react-native-firebase/auth';
+import { NativeRouter, Route, Link } from "react-router-native";
 
-export default class App extends React.Component {
+export default class Login extends React.Component {
   state={
     email:"",
     password:""
   }
 
-  Login = () => {
+  Login = (event) => {
     firebase
       .auth()
       .signInWithEmailAndPassword(this.state.email, this.state.password)
       .then(user => {
         this.setState({ user });
-        console.log(user);
+        //console.log(user);
+        this.props.onPress(user)
+
       })
       .catch(error => console.log(error));
   };
@@ -41,14 +44,17 @@ export default class App extends React.Component {
         <TouchableOpacity>
           <Text style={styles.forgot}>Forgot Password?</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.loginBtn} onPress={this.Login}>
+        <Link to="/app" component={TouchableOpacity} style={styles.loginBtn} activeOpacity={0.8} onPress={this.Login}>
+            <Text style={styles.loginText}>LOGIN</Text>
+        </Link>
+
+        {/*<TouchableOpacity style={styles.loginBtn} onPress={this.Login}>
           <Text style={styles.loginText}>LOGIN</Text>
-        </TouchableOpacity>
+    </TouchableOpacity>*/}
+        
         <TouchableOpacity>
           <Text style={styles.loginText}>Signup</Text>
         </TouchableOpacity>
-
-  
       </View>
     );
   }

@@ -19,6 +19,7 @@ import Config from "react-native-config";
 import axios from 'axios';
 import Animated from 'react-native-reanimated';
 import Login from './src/Login/Login'
+import { NativeRouter, Route, Redirect } from "react-router-native";
 
 function CustomDrawerContent({ progress, ...rest }) {
   const translateX = Animated.interpolate(progress, {
@@ -59,6 +60,7 @@ export default class App extends React.Component {
     super(props);
     this.state = { loading: true };
     this.apiData = {};
+    this.user = null;
   }
 
   /*async componentDidMount() {
@@ -68,14 +70,34 @@ export default class App extends React.Component {
     this.setState({ loading: false });
   }*/
 
+  requireAuth(nextState, replace) {
+    console.log("ok")
+    if (!this.user) {
+      replace({
+        pathname: '/'
+      })
+    }
+  }
+
   render() {
       return (
         <Root>
           {/*<NavigationContainer>
             <MyDrawer />
           </NavigationContainer>*/}
-          <Login />
+          <NativeRouter>
+            <Route exact path="/" render={(props) => <Login {...props} onPress={(value) => this.user = value} />} />
+            <Route path="/app" render={
+              (props) => this.user ? 
+              (<NavigationContainer>
+            <MyDrawer />
+          </NavigationContainer>) : 
+          (<Redirect to="/"/>)}  
+          onEnter={this.requireAuth} />
+          </NativeRouter>
         </Root>
+
+
       );
     
   }
