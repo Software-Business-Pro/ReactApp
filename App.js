@@ -18,6 +18,7 @@ import Api from './src/ApiData/ApiData';
 import Config from "react-native-config";
 import axios from 'axios';
 import Animated from 'react-native-reanimated';
+import Login from './src/Login/Login'
 
 function CustomDrawerContent({ progress, ...rest }) {
   const translateX = Animated.interpolate(progress, {
@@ -70,9 +71,10 @@ export default class App extends React.Component {
   render() {
       return (
         <Root>
-          <NavigationContainer>
+          {/*<NavigationContainer>
             <MyDrawer />
-          </NavigationContainer>
+          </NavigationContainer>*/}
+          <Login />
         </Root>
       );
     
