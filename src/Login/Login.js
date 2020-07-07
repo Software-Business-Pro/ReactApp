@@ -17,17 +17,24 @@ export default class Login extends React.Component {
   }
 
   Login = (event) => {
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(this.state.email, this.state.password)
-      .then(user => {
-        this.setState({ user });
-        //console.log(user);
-      })
-      .catch(error => {
-        console.log(error)
-        this.setState({ error });
-      });
+    if(this.state.email.trim() !== '' && this.state.password.trim() !== '')
+    {
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(this.state.email, this.state.password)
+        .then(user => {
+          this.setState({ user });
+          //console.log(user);
+        })
+        .catch(error => {
+          console.log(error)
+          this.setState({ error });
+        });
+      }
+      else
+      {
+        this.setState({error: "L'email et le mot de passe doivent être remplis"})
+      }
   };
 
   render(){
@@ -35,10 +42,11 @@ export default class Login extends React.Component {
       if(this.state.error) {
         Toast.show({
           text: this.state.error.toString(),
-          buttonText: "Go",
+          buttonText: "OK",
           duration: 8000,
-          position: "bottom"
-          })
+          position: "bottom",
+          type: "danger"
+        })
           this.setState({error: null})
       }
     return (
@@ -63,7 +71,7 @@ export default class Login extends React.Component {
           <TouchableOpacity>
             <Text style={styles.forgot}>Mot de passe oublié ?</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.loginBtn} onPress={this.Login}>
+          <TouchableOpacity style={styles.loginBtn} onPress={this.Login} >
             <Text style={styles.loginText}>Connexion</Text>
           </TouchableOpacity>
           {(this.state.user) && <Redirect to={{
@@ -100,7 +108,7 @@ const styles = StyleSheet.create({
   },
   inputText:{
     height:50,
-    color:"white"
+    color:"black"
   },
   forgot:{
     color:"white",
