@@ -32,7 +32,7 @@ export default class Login extends React.Component {
       }
       else
       {
-        this.setState({error: "L'email et le mot de passe doivent être remplis"})
+        this.setState({error: "Veuillez renseigner l'email et le mot de passe"})
       }
   };
 

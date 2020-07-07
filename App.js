@@ -19,12 +19,13 @@ import Config from "react-native-config";
 import axios from 'axios';
 import Animated from 'react-native-reanimated';
 import Login from './src/Login/Login'
-import { NativeRouter, Route, Redirect, Link, useHistory  } from "react-router-native";
+import { NativeRouter, Route, Redirect, Link, useHistory } from "react-router-native";
 
 function CustomDrawerContent({ progress, ...rest }) {
   const translateX = Animated.interpolate(progress, {
     inputRange: [0, 1],
     outputRange: [-100, 0],
+    useNativeDriver: true
   });
   let history = useHistory();
   return (
@@ -45,7 +46,7 @@ function MyDrawer(props) {
   const dimensions = useWindowDimensions();
   const isLargeScreen = dimensions.width >= 768;
   return (
-    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}   drawerStyle={{
+    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} drawerStyle={{
       width: dimensions.width * 0.7,
     }} >
       <Drawer.Screen name="Accueil"  component={HomeScreen}/>
