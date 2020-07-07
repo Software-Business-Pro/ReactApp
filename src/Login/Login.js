@@ -13,7 +13,6 @@ export default class Login extends React.Component {
       redirection: false,
       error: null
     }
-
   }
 
   Login = (event) => {
@@ -38,7 +37,8 @@ export default class Login extends React.Component {
   };
 
   render(){
-    console.log(this.state.error)
+    //props.location.state.logout && this.setState({user: null})
+    console.log(this.state.user)
       if(this.state.error) {
         Toast.show({
           text: this.state.error.toString(),

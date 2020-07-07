@@ -19,19 +19,20 @@ import Config from "react-native-config";
 import axios from 'axios';
 import Animated from 'react-native-reanimated';
 import Login from './src/Login/Login'
-import { NativeRouter, Route, Redirect } from "react-router-native";
+import { NativeRouter, Route, Redirect, Link, useHistory  } from "react-router-native";
 
 function CustomDrawerContent({ progress, ...rest }) {
   const translateX = Animated.interpolate(progress, {
     inputRange: [0, 1],
     outputRange: [-100, 0],
   });
-
+  let history = useHistory();
   return (
     <DrawerContentScrollView {...rest}>
       <Animated.View style={{ transform: [{ translateX }] }}>
         <DrawerItemList {...rest} />
         <DrawerItem label="Help" onPress={() => alert('Link to help')} />
+        <DrawerItem label="Déconnection" onPress={() => history.push("/")} />
       </Animated.View>
     </DrawerContentScrollView>
   );
@@ -39,17 +40,16 @@ function CustomDrawerContent({ progress, ...rest }) {
 const Drawer = createDrawerNavigator();
 
 function MyDrawer(props) {
-  const apiData = props.apiData;
   const dimensions = useWindowDimensions();
   const isLargeScreen = dimensions.width >= 768;
   return (
-    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}   drawerStyle={{
+    <Drawer.Navigator drawerContent={props => <CustomDrawerContent />}   drawerStyle={{
       width: dimensions.width * 0.7,
-    }}>
+    }} >
       <Drawer.Screen name="Accueil"  component={HomeScreen}/>
-      <Drawer.Screen name="Carte"  component={HomeMap}/>
-      <Drawer.Screen name="Picker"  component={Pickertest}/>
-      <Drawer.Screen name="Ocr"  component={Ocr}/>
+      <Drawer.Screen name="Carte intéractive"  component={HomeMap}/>
+      <Drawer.Screen name="Envoi d'image"  component={Pickertest}/>
+      <Drawer.Screen name="Détéction de plaque"  component={Ocr}/>
     </Drawer.Navigator>
   );
 }
@@ -59,15 +59,7 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { loading: true };
-    this.apiData = {};
   }
-
-  /*async componentDidMount() {
-    // Get data
-    let apiResult = await Api.getAllData();
-    this.apiData = apiResult;
-    this.setState({ loading: false });
-  }*/
 
   render() {
       return (
@@ -81,7 +73,7 @@ export default class App extends React.Component {
               (<NavigationContainer>
             <MyDrawer />
           </NavigationContainer>) : 
-          (<Redirect to="/"/>)} />
+          (<Redirect to="/"/>)}/>
           </NativeRouter>
         </Root>
 
