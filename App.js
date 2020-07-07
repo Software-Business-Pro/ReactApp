@@ -32,7 +32,9 @@ function CustomDrawerContent({ progress, ...rest }) {
       <Animated.View style={{ transform: [{ translateX }] }}>
         <DrawerItemList {...rest} />
         <DrawerItem label="Help" onPress={() => alert('Link to help')} />
+        
         <DrawerItem label="Déconnection" onPress={() => history.push("/")} />
+        
       </Animated.View>
     </DrawerContentScrollView>
   );
@@ -43,7 +45,7 @@ function MyDrawer(props) {
   const dimensions = useWindowDimensions();
   const isLargeScreen = dimensions.width >= 768;
   return (
-    <Drawer.Navigator drawerContent={props => <CustomDrawerContent />}   drawerStyle={{
+    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}   drawerStyle={{
       width: dimensions.width * 0.7,
     }} >
       <Drawer.Screen name="Accueil"  component={HomeScreen}/>
@@ -59,8 +61,12 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { loading: true };
+    this.user = null;
   }
 
+  test(props) {
+    //console.log(props)
+  }
   render() {
       return (
         <Root>
