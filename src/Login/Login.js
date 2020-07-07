@@ -1,12 +1,19 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { firebase } from '@react-native-firebase/auth';
-import { NativeRouter, Route, Link } from "react-router-native";
+import { NativeRouter, Route, Link, Redirect } from "react-router-native";
+import { Container, Body, Content,Toast } from "native-base";
 
 export default class Login extends React.Component {
-  state={
-    email:"",
-    password:""
+  constructor(props) {
+    super(props)
+    this.state={
+      email:"",
+      password:"",
+      redirection: false,
+      error: null
+    }
+
   }
 
   Login = (event) => {
@@ -16,46 +23,55 @@ export default class Login extends React.Component {
       .then(user => {
         this.setState({ user });
         //console.log(user);
-        this.props.onPress(user)
-
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        console.log(error)
+        this.setState({ error });
+      });
   };
 
   render(){
+    console.log(this.state.error)
+      if(this.state.error) {
+        Toast.show({
+          text: this.state.error.toString(),
+          buttonText: "Go",
+          duration: 8000,
+          position: "bottom"
+          })
+          this.setState({error: null})
+      }
     return (
-      <View style={styles.container}>
-        <Text style={styles.logo}>Software Business Pro</Text>
-        <View style={styles.inputView} >
-          <TextInput  
-            style={styles.inputText}
-            placeholder="Email..." 
-            placeholderTextColor="#003f5c"
-            onChangeText={text => this.setState({email:text})}/>
+      <Container>
+        <View style={styles.container}>
+          <Text style={styles.logo}>Software Business Pro</Text>
+          <View style={styles.inputView} >
+            <TextInput  
+              style={styles.inputText}
+              placeholder="Email..." 
+              placeholderTextColor="#003f5c"
+              onChangeText={text => this.setState({email:text})}/>
+          </View>
+          <View style={styles.inputView} >
+            <TextInput  
+              secureTextEntry
+              style={styles.inputText}
+              placeholder="Mot de passe..." 
+              placeholderTextColor="#003f5c"
+              onChangeText={text => this.setState({password:text})}/>
+          </View>
+          <TouchableOpacity>
+            <Text style={styles.forgot}>Mot de passe oublié ?</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.loginBtn} onPress={this.Login}>
+            <Text style={styles.loginText}>Connexion</Text>
+          </TouchableOpacity>
+          {(this.state.user) && <Redirect to={{
+              pathname: '/app',
+              state: { user: this.state.user}
+          }}/>}
         </View>
-        <View style={styles.inputView} >
-          <TextInput  
-            secureTextEntry
-            style={styles.inputText}
-            placeholder="Password..." 
-            placeholderTextColor="#003f5c"
-            onChangeText={text => this.setState({password:text})}/>
-        </View>
-        <TouchableOpacity>
-          <Text style={styles.forgot}>Forgot Password?</Text>
-        </TouchableOpacity>
-        <Link to="/app" component={TouchableOpacity} style={styles.loginBtn} activeOpacity={0.8} onPress={this.Login}>
-            <Text style={styles.loginText}>LOGIN</Text>
-        </Link>
-
-        {/*<TouchableOpacity style={styles.loginBtn} onPress={this.Login}>
-          <Text style={styles.loginText}>LOGIN</Text>
-    </TouchableOpacity>*/}
-        
-        <TouchableOpacity>
-          <Text style={styles.loginText}>Signup</Text>
-        </TouchableOpacity>
-      </View>
+      </Container>
     );
   }
 }
@@ -63,19 +79,19 @@ export default class Login extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#003f5c',
+    backgroundColor: '#694fad',
     alignItems: 'center',
     justifyContent: 'center',
   },
   logo:{
     fontWeight:"bold",
     fontSize:38,
-    color:"#fb5b5a",
+    color:"#ffff",
     marginBottom:40
   },
   inputView:{
     width:"80%",
-    backgroundColor:"#465881",
+    backgroundColor:"#ffff",
     borderRadius:25,
     height:50,
     marginBottom:20,
@@ -92,7 +108,7 @@ const styles = StyleSheet.create({
   },
   loginBtn:{
     width:"80%",
-    backgroundColor:"#fb5b5a",
+    backgroundColor:"#5cb85c",
     borderRadius:25,
     height:50,
     alignItems:"center",

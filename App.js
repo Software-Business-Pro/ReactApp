@@ -60,7 +60,6 @@ export default class App extends React.Component {
     super(props);
     this.state = { loading: true };
     this.apiData = {};
-    this.user = null;
   }
 
   /*async componentDidMount() {
@@ -70,15 +69,6 @@ export default class App extends React.Component {
     this.setState({ loading: false });
   }*/
 
-  requireAuth(nextState, replace) {
-    console.log("ok")
-    if (!this.user) {
-      replace({
-        pathname: '/'
-      })
-    }
-  }
-
   render() {
       return (
         <Root>
@@ -86,14 +76,12 @@ export default class App extends React.Component {
             <MyDrawer />
           </NavigationContainer>*/}
           <NativeRouter>
-            <Route exact path="/" render={(props) => <Login {...props} onPress={(value) => this.user = value} />} />
-            <Route path="/app" render={
-              (props) => this.user ? 
+            <Route exact path="/" render={(props) => <Login {...props} />} />
+            <Route path="/app" render={(props) => props.location.state.user ? 
               (<NavigationContainer>
             <MyDrawer />
           </NavigationContainer>) : 
-          (<Redirect to="/"/>)}  
-          onEnter={this.requireAuth} />
+          (<Redirect to="/"/>)} />
           </NativeRouter>
         </Root>
 
