@@ -23,8 +23,20 @@ function formatXml(xmlParsed) {
   return res;
 }
 
-// Get data from SOAP API
+// Get data from SOAP API, our API and link datas
 class ApiData {
+  // Link vehicles with details informations about them
+  linkVehicles(vehiclesData, vehiclesDetailsData) {
+    let res = []
+    for(const v of vehiclesData) {
+      for(const vd of vehiclesDetailsData) {
+        if(v.sName === vd.matRef) {
+          res.push(Object.assign(v, vd))
+        }
+      }
+    }
+    return res;
+  }
 
   async getAllData() {
     // Ask for session
@@ -32,6 +44,7 @@ class ApiData {
     //console.log(resSession);
     let sessionRes = formatXml(parseXml(resSession, "GetSessionResult"));
     let allVehicles = [];
+    let allLinkedVehicles = [];
     // Get the session
     const iUserId = sessionRes[0]['iUserId'];
     const iSessionId = sessionRes[0]['iSessionId'];
@@ -50,12 +63,15 @@ class ApiData {
       //const resDrivers = await this.GetResources(iUserId, iSessionId, iAccountId);
       //allDrivers = formatXml(parseXml(resDrivers, "CNTResource"));
       //console.log(resDrivers);
+      let vehiclesDetails = await (await this.GetVehiclesDetails()).data;
+      allLinkedVehicles = this.linkVehicles(allVehicles, vehiclesDetails)
+      
     }
     else
     {
       console.log('Erreur session');
     }
-    return {vehicles : allVehicles};
+    return {vehicles : allLinkedVehicles};
   }
   // SOAP request for session
   async getSession() {
@@ -141,6 +157,10 @@ class ApiData {
           return err;
         });
     return (result);
+  }
+
+  async GetVehiclesDetails() {
+    return axios.get('https://sbpesgi.azurewebsites.net/Api/SBP/Vehicule')
   }
 
 } 
