@@ -39,17 +39,19 @@ class ApiData {
   }
 
   async linkPlanning(allLinkedVehicles) {
-    let res = []
     let dateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset()*60*1000).toISOString().substr(0,19).replace('T', ' ');
     let date = dateTime.split(' ')[0]
-    let time = dateTime.split(' ')[1].split(':').slice(0,-1).join(':')
+    let time = dateTime.split(' ')[1].split(':').slice(0,-1).join('h')
     let i = 0
     for(const v of allLinkedVehicles) {
-      let planning = await (await this.getVehiclePlanning(v.sName) ).data;
-      if(planning) {
-        for(const p of planning) {
-          if(date === p.date.split('T'[0]) && (time >= p.heureDebut.replace("h",":") && time < p.heureFin.replace("h",":"))) {
-            v.push({heureDebut: p.heureDebut.replace("h",":"), heureFin: p.heureFin.replace("h",":")})
+      console.log("enter 1 loop")
+      let planning = await this.getVehiclePlanning(v.sName);
+      console.log("planning got: ")
+      //console.log(planning.data)
+      if(planning.data) {
+        for(const p of planning.data) {
+          if(date === p.date.split('T'[0]) && (time >= p.heureDebut && time < p.heureFin)) {
+            Object.assign(v, {heureDebut: p.heureDebut.replace("h",":"), heureFin: p.heureFin.replace("h",":")})
             i++
           }
         }
@@ -88,9 +90,9 @@ class ApiData {
       let vehiclesDetails = await (await this.GetVehiclesDetails()).data;
       allLinkedVehicles = this.linkVehicles(allVehicles, vehiclesDetails)
 
-      let vehiclesPlanning = await (await this.GetVehiclesDetails()).data;
+      //let vehiclesPlanning = await (await this.GetVehiclesDetails()).data;
      // console.log(vehiclesPlanning)
-      //allLinkedVehiclesPlanning = await this.linkPlanning(allLinkedVehicles, vehiclesPlanning)
+      //allLinkedVehiclesPlanning = await this.linkPlanning(allLinkedVehicles)
       
     }
     else

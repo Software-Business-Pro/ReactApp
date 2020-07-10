@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import MapView, {Marker, Callout} from 'react-native-maps';
 import { StyleSheet, Text, View, Dimensions, Alert  } from 'react-native';
-import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Form, Item, Picker } from "native-base";
+import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, Input , Form, Item, Picker } from "native-base";
 import Geolocation from '@react-native-community/geolocation';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -63,30 +63,21 @@ export class Map extends Component {
 
   // Probably best
   createMarker() {
-    let filterList = "Aucun"
-    let data = null
-    if(this.props.route.params && this.props.route.params.filterList) filterList = this.props.route.params.filterList.slice(0,1)
-    
+    let filterList = {}
+    let data = this.state.apiData
+    if(this.props.route.params && this.props.route.params.filterList) filterList = this.props.route.params.filterList
     if(!this.state.isLoading) {
-      let test = false
       data = this.state.apiData
-      console.log(filterList)
-      if(filterList == "Aucun") data = this.state.apiData
-      else data = this.state.apiData.filter(v => v.sLocStatus == filterList)
+
+      for (const field in filterList) {
+        data = data.filter(v => filterList[field]["operator"] === "=" ? v[field] === filterList[field]["value"] : v[field].includes(filterList[field]["value"]))
+      }
+      if(this.props.route.params && this.props.route.params.filterList) this.props.route.params.filterList = {}
+
       let i = 0;
       return data.map(v =>
         (v.dLocLati && v.dLocLongi) && 
-        (/*<Marker key={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}}
-          pinColor = {"red"}
-          title={v.iVehId}
-          description={v.sLocStatus}
-          onPress={() => this.refs.CustomMarker.getData}
-          >
-            <Callout>
-              <CustomMarker data={v} ref={CustomMarker}/>
-            </Callout>
-          </Marker>*/
-          
+        (
           <CustomMarker id={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}} data={v}/>)
       )
     }
@@ -163,8 +154,8 @@ export class CustomMarker extends Component {
     }).catch(err=>{
       return err;
     });*/
-    let planning = await (await Api.getVehiclePlanning(this.props.data.matRef)).data;
-    this.linkPlanning(planning)
+    //let planning = await (await Api.getVehiclePlanning(this.props.data.matRef)).data;
+    //this.linkPlanning(planning)
     this.setState({heureDebut: this.props.data.heureDebut, heureFin: this.props.data.heureFin})
     
   }
@@ -187,26 +178,25 @@ export class CustomMarker extends Component {
   }
 
   render() {
-    console.log(this.state.heureDebut)
     return (
 
       <Marker key={this.state.heureDebut && this.props.id } coordinate = {{latitude: Number(this.props.data.dLocLati), longitude: Number(this.props.data.dLocLongi)}}
         planning={this.state.heureDebut}    
-        pinColor = {this.state.heureDebut === "N/A" || !this.state.heureDebut ? "green" : "red"}
+        pinColor = {this.props.data.heureDebut ? "red" : "green"}
         ref={ref => { this.marker = ref; }}
         tracksViewChanges={true}
-        onPress={() => {
+        /*onPress={() => {
           this.getData();
-        }}
+        }}*/
       >
       <Callout>
       <View>
         <Text>{"Référence: "+this.props.data.matRef}</Text>
         <Text>{"Equipement: "+this.props.data.matLibelle}</Text>
         <Text>{"Statut: "+this.props.data.sLocStatus}</Text>
-        <Text>{"Date de début de tâche: "+this.state.heureDebut}</Text>
-        <Text>{"Date de fin de tâche: "+this.state.heureFin}</Text>
-        <Text>{"Chauffeur: "+this.props.data.matChauffeur.trim() === "" ? "Sans chauffeur" : this.props.data.matChauffeur}</Text>
+        <Text>{"Date de début de tâche: "+(this.props.data.heureDebut !== undefined ? this.props.data.heureDebut : "N/A")}</Text>
+        <Text>{"Date de fin de tâche: "+(this.props.data.heureFin !== undefined ? this.props.data.heureFin : "N/A")}</Text>
+        <Text>{"Location chauffeur: "+(this.props.data.matChauffeur.trim() === "" ? "Sans chauffeur" : this.props.data.matChauffeur)}</Text>
         <Text>{"Client: "+this.props.data.cliRef}</Text>
       </View>
         </Callout>
@@ -262,22 +252,22 @@ class FilterMap extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selected2: undefined
+      sLocStatus: undefined,
+      matLibelle: undefined
     };
-    let filterList = []
+    this.filterList = {}
   }
   
  
-  onValueChange2(value) {
-    /*this.setState({
-      selected2: value
-    }, () => {console.log(this.state.selected2)
-      this.state.selected2 == "Aucun" ? this.setState({data: this.props.apiData}) : this.setState({data: this.props.apiData.filter(v => v.sLocStatus == this.state.selected2)})});
-    */
-   this.setState({
-    selected2: value
+  onValueChange2(key, operator, value) {
+    this.setState({
+    [key]: value
     })
-    this.filterList = [value]
+    if(value.trim() === "") {
+      if(this.filterList[key]) delete this.filterList[key]
+    }
+    else Object.assign(this.filterList, {[key]: {value: value, operator: operator}})
+    //console.log(this.filterList)
   }
 
   render() {
@@ -304,19 +294,25 @@ class FilterMap extends React.Component {
                   mode="dropdown"
                   iosIcon={<Icon name="arrow-down" />}
                   style={{ width: undefined }}
-                  placeholder="Select your SIM"
                   placeholderStyle={{ color: "#bfc6ea" }}
                   placeholderIconColor="#007aff"
-                  selectedValue={this.state.selected2}
-                  onValueChange={this.onValueChange2.bind(this)}
+                  selectedValue={this.state.sLocStatus}
+                  onValueChange={this.onValueChange2.bind(this, "sLocStatus", "=")}
                 >
-                  <Picker.Item label="Aucun" value="Aucun" />
+                  <Picker.Item label="Aucun" value="" />
                   <Picker.Item label="Arrêt" value="Arrêt" />
                   <Picker.Item label="Moteur tournant" value="Moteur tournant" />
                   <Picker.Item label="Immobilisation" value="Immobilisation" />
                   <Picker.Item label="Conduite" value="Conduite" />
                 </Picker>
               </Item>
+              <Item style={{paddingLeft: 3, marginLeft: 0}}>
+                <Input 
+                placeholder="Type" 
+                onChangeText={this.onValueChange2.bind(this, "matLibelle", "~=")}
+                />
+              </Item>
+              
             </Form>
             <View style={{alignItems: "center", padding: 30}}>
             <Button
