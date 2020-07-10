@@ -38,6 +38,27 @@ class ApiData {
     return res;
   }
 
+  async linkPlanning(allLinkedVehicles) {
+    let res = []
+    let dateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset()*60*1000).toISOString().substr(0,19).replace('T', ' ');
+    let date = dateTime.split(' ')[0]
+    let time = dateTime.split(' ')[1].split(':').slice(0,-1).join(':')
+    let i = 0
+    for(const v of allLinkedVehicles) {
+      let planning = await (await this.getVehiclePlanning(v.sName) ).data;
+      if(planning) {
+        for(const p of planning) {
+          if(date === p.date.split('T'[0]) && (time >= p.heureDebut.replace("h",":") && time < p.heureFin.replace("h",":"))) {
+            v.push({heureDebut: p.heureDebut.replace("h",":"), heureFin: p.heureFin.replace("h",":")})
+            i++
+          }
+        }
+      }
+    }
+    console.log("Longueur :"+i)
+    return allLinkedVehicles;
+  }
+
   async getAllData() {
     // Ask for session
     const resSession = await this.getSession();
@@ -45,6 +66,7 @@ class ApiData {
     let sessionRes = formatXml(parseXml(resSession, "GetSessionResult"));
     let allVehicles = [];
     let allLinkedVehicles = [];
+    let allLinkedVehiclesPlanning = [];
     // Get the session
     const iUserId = sessionRes[0]['iUserId'];
     const iSessionId = sessionRes[0]['iSessionId'];
@@ -65,6 +87,10 @@ class ApiData {
       //console.log(resDrivers);
       let vehiclesDetails = await (await this.GetVehiclesDetails()).data;
       allLinkedVehicles = this.linkVehicles(allVehicles, vehiclesDetails)
+
+      let vehiclesPlanning = await (await this.GetVehiclesDetails()).data;
+     // console.log(vehiclesPlanning)
+      //allLinkedVehiclesPlanning = await this.linkPlanning(allLinkedVehicles, vehiclesPlanning)
       
     }
     else
@@ -162,6 +188,10 @@ class ApiData {
   async GetVehiclesDetails() {
     return axios.get('https://sbpesgi.azurewebsites.net/Api/SBP/Vehicule')
   }
+
+  async getVehiclePlanning(id) {
+    return axios.get('https://sbpesgi.azurewebsites.net//Api/SBP/Planning/'+id)
+ }
 
 } 
 

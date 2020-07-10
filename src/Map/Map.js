@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
-import MapView, {Marker} from 'react-native-maps';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import MapView, {Marker, Callout} from 'react-native-maps';
+import { StyleSheet, Text, View, Dimensions, Alert  } from 'react-native';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Form, Item, Picker } from "native-base";
 import Geolocation from '@react-native-community/geolocation';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { NavigationEvents } from 'react-navigation';
+import axios from 'axios';
 import Api from '../ApiData/ApiData';
 
 export class Map extends Component {
   constructor(props) {
     super(props);
+    let test = [{heureDebut: "", heureFin: ""}]
     this.state = {
       apiData: {},
       region:
@@ -20,10 +22,10 @@ export class Map extends Component {
         longitudeDelta: 0.004,
         latitudeDelta: 0.009
       },
-      isLoading: true
+      isLoading: true,
     };
   }
-
+  
   async componentDidMount() {
     console.log("test")
     // Get data
@@ -66,6 +68,7 @@ export class Map extends Component {
     if(this.props.route.params && this.props.route.params.filterList) filterList = this.props.route.params.filterList.slice(0,1)
     
     if(!this.state.isLoading) {
+      let test = false
       data = this.state.apiData
       console.log(filterList)
       if(filterList == "Aucun") data = this.state.apiData
@@ -73,10 +76,18 @@ export class Map extends Component {
       let i = 0;
       return data.map(v =>
         (v.dLocLati && v.dLocLongi) && 
-        (<Marker key={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}}
+        (/*<Marker key={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}}
           pinColor = {"red"}
           title={v.iVehId}
-          description={v.sLocStatus}/>)
+          description={v.sLocStatus}
+          onPress={() => this.refs.CustomMarker.getData}
+          >
+            <Callout>
+              <CustomMarker data={v} ref={CustomMarker}/>
+            </Callout>
+          </Marker>*/
+          
+          <CustomMarker id={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}} data={v}/>)
       )
     }
     else return (null)
@@ -131,6 +142,106 @@ export class Map extends Component {
         </Content>
       </Container>
     );
+  }
+}
+
+export class CustomMarker extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      planning: null,
+      loading: true
+    }
+  }
+
+   async getData() {
+    //console.log(this.props.data.matRef)
+    /*Api.getVehiclePlanning(this.props.data.matRef).then((data) => {
+      //this.setState({ loading: false, bonjour: data.data[0].heureDebut}, () => this.marker.showCallout())
+      //console.log(this.state.bonjour)
+      return "test"
+    }).catch(err=>{
+      return err;
+    });*/
+    let planning = await (await Api.getVehiclePlanning(this.props.data.matRef)).data;
+    this.linkPlanning(planning)
+    this.setState({heureDebut: this.props.data.heureDebut, heureFin: this.props.data.heureFin})
+    
+  }
+
+  linkPlanning(planning) {
+    let i = 0
+    let dateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset()*60*1000).toISOString().substr(0,19).replace('T', ' ');
+    let date = dateTime.split(' ')[0]
+    let time = dateTime.split(' ')[1].split(':').slice(0,-1).join(':')
+    for(const p of planning) {
+      if(date === p.date.split('T'[0]) && (time >= p.heureDebut.replace("h",":") && time < p.heureFin.replace("h",":"))) {
+        //this.props.data.push({heureDebut: p.heureDebut.replace("h",":"), heureFin: p.heureFin.replace("h",":")})
+        Object.assign(this.props.data, {heureDebut: p.heureDebut.replace("h",":"), heureFin: p.heureFin.replace("h",":")})
+        console.log("ok")
+      }
+      else {
+        Object.assign(this.props.data, {heureDebut: "N/A", heureFin: "N/A"})
+      }
+    }
+  }
+
+  render() {
+    console.log(this.state.heureDebut)
+    return (
+
+      <Marker key={this.state.heureDebut && this.props.id } coordinate = {{latitude: Number(this.props.data.dLocLati), longitude: Number(this.props.data.dLocLongi)}}
+        planning={this.state.heureDebut}    
+        pinColor = {this.state.heureDebut === "N/A" || !this.state.heureDebut ? "green" : "red"}
+        ref={ref => { this.marker = ref; }}
+        tracksViewChanges={true}
+        onPress={() => {
+          this.getData();
+        }}
+      >
+      <Callout>
+      <View>
+        <Text>{"Référence: "+this.props.data.matRef}</Text>
+        <Text>{"Equipement: "+this.props.data.matLibelle}</Text>
+        <Text>{"Statut: "+this.props.data.sLocStatus}</Text>
+        <Text>{"Date de début de tâche: "+this.state.heureDebut}</Text>
+        <Text>{"Date de fin de tâche: "+this.state.heureFin}</Text>
+        <Text>{"Chauffeur: "+this.props.data.matChauffeur.trim() === "" ? "Sans chauffeur" : this.props.data.matChauffeur}</Text>
+        <Text>{"Client: "+this.props.data.cliRef}</Text>
+      </View>
+        </Callout>
+      </Marker>
+
+      
+    )
+  }
+}
+
+export class CustomTextMarker extends Component {
+  constructor(props) {
+    
+    super(props),
+    //console.log("this.props.test")
+    this.state = {
+      heureDebut: this.props.test.heureDebut,
+      heureFin: this.props.test.heureFin
+    }
+  }
+  
+  render() {
+    /*console.log("----------ok----------------")
+    console.log(this.props.test)
+    console.log("----------------------------")*/
+    return (
+      
+      <View>
+        <Text>{"Référence: "+this.props.data.matRef}</Text>
+        <Text>{"Equipement: "+this.props.data.matLibelle}</Text>
+        <Text>{"Heure début: "+this.props.test.heureDebut}</Text>
+        <Text>{"Heure fin: "+this.state.heureFin}</Text>
+        
+      </View>
+    )
   }
 }
 
