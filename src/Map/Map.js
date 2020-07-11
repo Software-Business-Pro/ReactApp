@@ -6,8 +6,10 @@ import Geolocation from '@react-native-community/geolocation';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { NavigationEvents } from 'react-navigation';
+import { NativeRouter, Route, Redirect, Link, useHistory } from "react-router-native";
 import axios from 'axios';
 import Api from '../ApiData/ApiData';
+import Details from './Details';
 
 export class Map extends Component {
   constructor(props) {
@@ -78,14 +80,13 @@ export class Map extends Component {
       return data.map(v =>
         (v.dLocLati && v.dLocLongi) && 
         (
-          <CustomMarker id={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}} data={v}/>)
+          <CustomMarker props={this.props} id={i++} coordinate = {{latitude: Number(v.dLocLati), longitude: Number(v.dLocLongi)}} data={v}/>)
       )
     }
     else return (null)
   }
 
   render() {
-    console.log(this.props.route.params)
     //console.log(this.state.apiData)
     
     return (
@@ -141,33 +142,26 @@ export class CustomMarker extends Component {
     super(props)
     this.state = {
       planning: null,
-      loading: true
+      loading: true,
+      details: false
     }
   }
 
    async getData() {
-    //console.log(this.props.data.matRef)
-    /*Api.getVehiclePlanning(this.props.data.matRef).then((data) => {
-      //this.setState({ loading: false, bonjour: data.data[0].heureDebut}, () => this.marker.showCallout())
-      //console.log(this.state.bonjour)
-      return "test"
-    }).catch(err=>{
-      return err;
-    });*/
-    //let planning = await (await Api.getVehiclePlanning(this.props.data.matRef)).data;
-    //this.linkPlanning(planning)
-    this.setState({heureDebut: this.props.data.heureDebut, heureFin: this.props.data.heureFin})
-    
+    let planning = await (await Api.getVehiclePlanning(this.props.data.matRef)).data;
+    this.props.props.navigation.navigate('Details', {
+      data: this.props.data,
+      planning: planning
+     })
   }
 
-  linkPlanning(planning) {
+  /*linkPlanning(planning) {
     let i = 0
     let dateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset()*60*1000).toISOString().substr(0,19).replace('T', ' ');
     let date = dateTime.split(' ')[0]
     let time = dateTime.split(' ')[1].split(':').slice(0,-1).join(':')
     for(const p of planning) {
       if(date === p.date.split('T'[0]) && (time >= p.heureDebut.replace("h",":") && time < p.heureFin.replace("h",":"))) {
-        //this.props.data.push({heureDebut: p.heureDebut.replace("h",":"), heureFin: p.heureFin.replace("h",":")})
         Object.assign(this.props.data, {heureDebut: p.heureDebut.replace("h",":"), heureFin: p.heureFin.replace("h",":")})
         console.log("ok")
       }
@@ -175,19 +169,19 @@ export class CustomMarker extends Component {
         Object.assign(this.props.data, {heureDebut: "N/A", heureFin: "N/A"})
       }
     }
-  }
+  }*/
+  
 
   render() {
     return (
 
       <Marker key={this.state.heureDebut && this.props.id } coordinate = {{latitude: Number(this.props.data.dLocLati), longitude: Number(this.props.data.dLocLongi)}}
         planning={this.state.heureDebut}    
-        pinColor = {this.props.data.heureDebut ? "red" : "green"}
+        pinColor = {!this.props.data.heureDebut ? "red" : "green"}
         ref={ref => { this.marker = ref; }}
         tracksViewChanges={true}
-        /*onPress={() => {
-          this.getData();
-        }}*/
+        onCalloutPress={() => {this.getData()}
+      }
       >
       <Callout>
       <View>
@@ -198,39 +192,14 @@ export class CustomMarker extends Component {
         <Text>{"Date de fin de tâche: "+(this.props.data.heureFin !== undefined ? this.props.data.heureFin : "N/A")}</Text>
         <Text>{"Location chauffeur: "+(this.props.data.matChauffeur.trim() === "" ? "Sans chauffeur" : this.props.data.matChauffeur)}</Text>
         <Text>{"Client: "+this.props.data.cliRef}</Text>
+        <View style={styles.button}>
+        <Button primary rounded success title="Details">
+          <Text style={{color: "white", textAlign: "center", width: 100}}>Details</Text>
+        </Button>
+        </View>
       </View>
         </Callout>
       </Marker>
-
-      
-    )
-  }
-}
-
-export class CustomTextMarker extends Component {
-  constructor(props) {
-    
-    super(props),
-    //console.log("this.props.test")
-    this.state = {
-      heureDebut: this.props.test.heureDebut,
-      heureFin: this.props.test.heureFin
-    }
-  }
-  
-  render() {
-    /*console.log("----------ok----------------")
-    console.log(this.props.test)
-    console.log("----------------------------")*/
-    return (
-      
-      <View>
-        <Text>{"Référence: "+this.props.data.matRef}</Text>
-        <Text>{"Equipement: "+this.props.data.matLibelle}</Text>
-        <Text>{"Heure début: "+this.props.test.heureDebut}</Text>
-        <Text>{"Heure fin: "+this.state.heureFin}</Text>
-        
-      </View>
     )
   }
 }
@@ -245,6 +214,14 @@ const styles = StyleSheet.create({
   mapStyle: {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
+  },
+  button: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 10,
+    paddingBottom: 5
   },
 });
 
@@ -283,7 +260,7 @@ class FilterMap extends React.Component {
             </Button>
           </Left>
           <Body>
-            <Title>{this.props.route.name}</Title>
+            <Title>Filtres</Title>
           </Body>
           <Right/>
         </Header>
@@ -355,6 +332,12 @@ export default class HomeMap extends React.Component {
             <MaterialCommunityIcons name="map" color={color} size={26} />
           ),
         }} />
+        <Tab.Screen name="Details" component={Details} options={{
+          tabBarLabel: 'Details',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="tune" color={color} size={26} />
+          ),
+        }}/>
         <Tab.Screen name="Filter" component={FilterMap} options={{
           tabBarLabel: 'Filtres',
           tabBarIcon: ({ color }) => (

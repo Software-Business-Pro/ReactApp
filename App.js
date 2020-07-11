@@ -17,6 +17,7 @@ import Animated from 'react-native-reanimated';
 import Login from './src/Login/Login'
 import { NativeRouter, Route, Redirect, Link, useHistory } from "react-router-native";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Details from './src/Map/Details';
 
 function CustomDrawerContent({ progress, ...rest }) {
   const translateX = Animated.interpolate(progress, {
@@ -49,6 +50,7 @@ const Drawer = createDrawerNavigator();
 function MyDrawer(props) {
   const dimensions = useWindowDimensions();
   const isLargeScreen = dimensions.width >= 768;
+  
   return (
     <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} drawerStyle={{
       width: dimensions.width * 0.7,
@@ -98,9 +100,10 @@ export default class App extends React.Component {
         <Root>
           <NativeRouter>
             <Route exact path="/" render={(props) => <Login {...props} />} />
+            <Route exact path="/details" component={({history, props}) => {return <Details props={props} history={history}/>}}/>
             <Route path="/app" render={(props) => props.location.state.user ? 
               (<NavigationContainer>
-            <MyDrawer />
+            <MyDrawer/>
           </NavigationContainer>) : 
           (<Redirect to="/"/>)}/>
           </NativeRouter>

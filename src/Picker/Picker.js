@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { StyleSheet, Text, View, Dimensions, Image } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Form, Item, Picker } from "native-base";
@@ -41,6 +42,22 @@ export default class Pickertest extends React.Component {
       }
     });
   };
+
+  sendImage() {
+    //console.log(this.state.filePath)
+    const formData = new FormData();
+    
+    formData.append('file', this.state.filePath, "test");
+
+    axios.post('https://sbpesgi.azurewebsites.net/Api/SBP/Image/P774', formData)
+      .then((response) => {
+        //console.log(response)
+        })
+      .catch((err) => {
+        //console.log(err)
+      })
+  }
+
   render() {
     return (
         <Container>
@@ -70,7 +87,7 @@ export default class Pickertest extends React.Component {
                         <Button rounded title="Choose File" onPress={this.chooseFile.bind(this)} style={{marginBottom: 10}}>
                             <Text style={{color: "white", textAlign: "center", fontSize: 16, width: 135}}>Choisir la photo</Text>
                         </Button>
-                        {this.state.imageChose && (<Button primary rounded success title="Send File">
+                        {this.state.imageChose && (<Button primary rounded success title="Send File" onPress={() => this.sendImage()}>
                             <Text style={{color: "white", textAlign: "center", fontSize: 16, width: 135}}>Envoyer la photo</Text>
                         </Button>)}
                     </View>
