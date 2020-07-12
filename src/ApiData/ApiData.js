@@ -38,16 +38,14 @@ class ApiData {
     return res;
   }
 
+  // Methode trop longue =>  abandonnée
   async linkPlanning(allLinkedVehicles) {
     let dateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset()*60*1000).toISOString().substr(0,19).replace('T', ' ');
     let date = dateTime.split(' ')[0]
     let time = dateTime.split(' ')[1].split(':').slice(0,-1).join('h')
     let i = 0
     for(const v of allLinkedVehicles) {
-      console.log("enter 1 loop")
       let planning = await this.getVehiclePlanning(v.sName);
-      console.log("planning got: ")
-      //console.log(planning.data)
       if(planning.data) {
         for(const p of planning.data) {
           if(date === p.date.split('T'[0]) && (time >= p.heureDebut && time < p.heureFin)) {
@@ -64,36 +62,21 @@ class ApiData {
   async getAllData() {
     // Ask for session
     const resSession = await this.getSession();
-    //console.log(resSession);
     let sessionRes = formatXml(parseXml(resSession, "GetSessionResult"));
     let allVehicles = [];
     let allLinkedVehicles = [];
-    let allLinkedVehiclesPlanning = [];
     // Get the session
     const iUserId = sessionRes[0]['iUserId'];
     const iSessionId = sessionRes[0]['iSessionId'];
     const iAccountId = sessionRes[0]['iAccountId'];
     
     if(sessionRes.length === 1 && iUserId && iSessionId && iAccountId) {
-      console.log('-------------------Session OK----------------');
-      console.log("iUserId : " + iUserId);
-      console.log("iSessionId : " + iSessionId);
-      console.log("iAccountId : " + iAccountId);
       // Get all the vehicles
       const resVehicles = await this.GetVehicles(iUserId, iSessionId, iAccountId);
       allVehicles = formatXml(parseXml(resVehicles, "CNTVehicle"));
-      //console.log(allVehicles);
       // Get the drivers
-      //const resDrivers = await this.GetResources(iUserId, iSessionId, iAccountId);
-      //allDrivers = formatXml(parseXml(resDrivers, "CNTResource"));
-      //console.log(resDrivers);
       let vehiclesDetails = await (await this.GetVehiclesDetails()).data;
       allLinkedVehicles = this.linkVehicles(allVehicles, vehiclesDetails)
-
-      //let vehiclesPlanning = await (await this.GetVehiclesDetails()).data;
-     // console.log(vehiclesPlanning)
-      //allLinkedVehiclesPlanning = await this.linkPlanning(allLinkedVehicles)
-      
     }
     else
     {
@@ -195,7 +178,7 @@ class ApiData {
     return axios.get('https://sbpesgi.azurewebsites.net//Api/SBP/Planning/'+id)
  }
 
-} 
+}
 
 const Api = new ApiData();
 export default Api;

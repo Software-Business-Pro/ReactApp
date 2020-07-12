@@ -29,12 +29,6 @@ function CustomDrawerContent({ progress, ...rest }) {
     <DrawerContentScrollView {...rest}>
       <Animated.View style={{ transform: [{ translateX }] }}>
         <DrawerItemList {...rest} />
-        <DrawerItem label="Aide" onPress={() => alert('Link to help')} icon={ ({ focused, size, color }) =>
-          <MaterialCommunityIcons color={focused ? '#000' : '#ccc'}
-                size={size} 
-                name={focused ? 'help-circle' : 'help-circle-outline'} 
-                color={focused ? color : '#ccc'}/> 
-         }/>
         <DrawerItem label="Déconnection" onPress={() => history.push("/")} icon={ ({ focused, size, color }) =>
           <MaterialCommunityIcons color={focused ? '#000' : '#ccc'}
                 size={size} 
@@ -55,23 +49,9 @@ function MyDrawer(props) {
     <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} drawerStyle={{
       width: dimensions.width * 0.7,
     }} >
-      <Drawer.Screen name="Accueil"  component={HomeScreen} options={{drawerIcon: ({focused, size, color}) => (
-            <MaterialCommunityIcons
-              name={focused ? "home" : "home-outline"}
-              size={size}
-              color={focused ? color : '#ccc'}
-            />
-          )}}/>
-      <Drawer.Screen name="Carte intéractive"  component={HomeMap}  options={{drawerIcon: ({focused, size, color}) => (
+      <Drawer.Screen name="Carte"  component={HomeMap}  options={{drawerIcon: ({focused, size, color}) => (
             <MaterialCommunityIcons
               name={focused ? "map-marker" : "map-marker-outline"}
-              size={size}
-              color={focused ? color : '#ccc'}
-            />
-          )}}/>
-      <Drawer.Screen name="Envoi d'image"  component={Pickertest} options={{drawerIcon: ({focused, size, color}) => (
-            <MaterialCommunityIcons
-              name={"image-plus"}
               size={size}
               color={focused ? color : '#ccc'}
             />

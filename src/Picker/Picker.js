@@ -1,15 +1,20 @@
 import React from 'react';
-import axios from 'axios';
-import { StyleSheet, Text, View, Dimensions, Image } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
-import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Form, Item, Picker } from "native-base";
+import { Button, Toast } from "native-base";
 
-export default class Pickertest extends React.Component {
+
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
+
+export default class MyPicker extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       filePath: {},
-      imageChose: false
+      imageChose: false,
+      successUpload: null
     };
   }
   chooseFile = () => {
@@ -24,8 +29,6 @@ export default class Pickertest extends React.Component {
       },
     };
     ImagePicker.showImagePicker(options, response => {
-      console.log('Response = ', response);
-
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -44,64 +47,72 @@ export default class Pickertest extends React.Component {
   };
 
   sendImage() {
-    //console.log(this.state.filePath)
-    const formData = new FormData();
-    
-    formData.append('file', this.state.filePath, "test");
-
-    axios.post('https://sbpesgi.azurewebsites.net/Api/SBP/Image/P774', formData)
-      .then((response) => {
-        //console.log(response)
-        })
-      .catch((err) => {
-        //console.log(err)
-      })
+    if(!isEmpty(this.props.idV)) {
+      var file = {
+        uri: this.state.filePath.uri,
+        type: 'image/jpeg',
+        name: 'photo.jpg',
+      };
+      
+      var body = new FormData();
+      body.append('file', file);
+      
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            console.log("ok")
+            this.setState({successUpload: true})
+        }
+    }
+      xhr.open('POST', "https://sbpesgi.azurewebsites.net/Api/SBP/Image/"+this.props.idV);
+      xhr.send(body);
+    }
   }
 
   render() {
+    console.log("test: "+this.state.successUpload)
+    if(this.state.successUpload !== null)
+      if(this.state.successUpload) {
+        Toast.show({
+          text: "L'image a correctement été envoyé",
+          buttonText: "OK",
+          duration: 5000,
+          position: "bottom",
+          type: "success"
+        })
+      }
+      else {
+        Toast.show({
+          text: "Une erreur a été rencontré lors de l'envoi de l'image",
+          buttonText: "OK",
+          duration: 5000,
+          position: "bottom",
+          type: "danger"
+        })
+      }
     return (
-        <Container>
-            <Header>
-                <Left>
-                <Button
-                    transparent
-                    onPress={() => this.props.navigation.openDrawer()}>
-                    <Icon name="menu" />
-                </Button>
-                </Left>
-                <Body>
-                <Title>{this.props.route.name}</Title>
-                </Body>
-                <Right />
-            </Header>
-            <Content style={this.state.imageChose && {marginTop: 50}}>
-                <View style={styles.container}>
-                    <View style={styles.container}>
-                        <Image
-                            source={{ uri: this.state.filePath.uri }}
-                            style={{ width: 250, height: 250 }}
-                        />
-                        <Text style={{ alignItems: 'center' }}>
-                            {this.state.filePath.uri}
-                        </Text>
-                        <Button rounded title="Choose File" onPress={this.chooseFile.bind(this)} style={{marginBottom: 10}}>
-                            <Text style={{color: "white", textAlign: "center", fontSize: 16, width: 135}}>Choisir la photo</Text>
-                        </Button>
-                        {this.state.imageChose && (<Button primary rounded success title="Send File" onPress={() => this.sendImage()}>
-                            <Text style={{color: "white", textAlign: "center", fontSize: 16, width: 135}}>Envoyer la photo</Text>
-                        </Button>)}
-                    </View>
-                </View>
-            </Content>
-        </Container>
+          <View style={styles.container}>
+              {!isEmpty(this.state.filePath) && <Image
+                  source={{ uri: this.state.filePath.uri }}
+                  style={{ width: 250, height: 250 }}
+              />}
+              <Text style={{ alignItems: 'center' }}>
+              </Text>
+              <Button rounded title="Choose File" onPress={this.chooseFile.bind(this)} style={{marginBottom: 10}}>
+                  <Text style={{color: "white", textAlign: "center", fontSize: 15, width: 135}}>Choisir la photo</Text>
+              </Button>
+              {this.state.imageChose && (<Button primary rounded success title="Send File" onPress={() => this.sendImage()}>
+                  <Text style={{color: "white", textAlign: "center", fontSize: 15, width: 135}}>Envoyer la photo</Text>
+              </Button>)}
+          </View>
     );
   }
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: 10
   },
 });

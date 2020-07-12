@@ -19,26 +19,19 @@ export class Map extends Component {
       apiData: {},
       region:
       {
-        longitude: 0,
-        latitude: 0,
-        longitudeDelta: 0.004,
-        latitudeDelta: 0.009
+        longitude: 2.3488,
+        latitude: 48.8534,
+        longitudeDelta: 0.04,
+        latitudeDelta: 0.05
       },
       isLoading: true,
     };
   }
   
   async componentDidMount() {
-    console.log("test")
-    // Get data
-    let apiResult = await Api.getAllData();
-    this.setState({ apiData: apiResult.vehicles });
-    this.setState({ isLoading: false });
-    
-
+    // Get location
     Geolocation.getCurrentPosition(
       (position) => {
-          console.log(position);
           this.setState({
               region: {
                   longitude: position.coords.longitude,
@@ -49,7 +42,6 @@ export class Map extends Component {
           });
       },
       (error) => {
-          // See error code charts below.
           console.log(error.code, error.message);
           throw error;
       },
@@ -61,9 +53,11 @@ export class Map extends Component {
           maximumAge: 10000 
       }
     );
+    // Get API data
+    let apiResult = await Api.getAllData();
+    this.setState({ apiData: apiResult.vehicles, isLoading: false });
   }
 
-  // Probably best
   createMarker() {
     let filterList = {}
     let data = this.state.apiData
@@ -86,9 +80,7 @@ export class Map extends Component {
     else return (null)
   }
 
-  render() {
-    //console.log(this.state.apiData)
-    
+  render() {    
     return (
       <Container>
         <Header>
@@ -101,35 +93,17 @@ export class Map extends Component {
             </Button>
           </Left>
           <Body>
-            <Title>{this.props.route.name}</Title>
+            <Title>Carte</Title>
           </Body>
-          <Right>
-            <Button 
-              transparent
-              onPress={() =>this.props.navigation.navigate('Ocr')}
-            >
-              <Icon name='options' />
-            </Button>
-          </Right>
+          <Right/>
         </Header>
         <Content>
           <MapView 
             region={this.state.region}
             style={styles.mapStyle}
-            region = {this.state.region} 
-            onRegionChange={ 
-              region => {
-                //console.log("Region Changed");
-                //this.setState({region});
-              } }
-            onRegionChangeComplete={ 
-              region => {
-                //console.log("Region change complete");
-                //this.setState({region});
-              } }
             showsUserLocation={ true } 
           >
-          { this.createMarker() }
+          { !this.state.isLoading && this.createMarker() }
           </MapView>
         </Content>
       </Container>
@@ -174,7 +148,6 @@ export class CustomMarker extends Component {
 
   render() {
     return (
-
       <Marker key={this.state.heureDebut && this.props.id } coordinate = {{latitude: Number(this.props.data.dLocLati), longitude: Number(this.props.data.dLocLongi)}}
         planning={this.state.heureDebut}    
         pinColor = {!this.props.data.heureDebut ? "red" : "green"}
@@ -188,8 +161,6 @@ export class CustomMarker extends Component {
         <Text>{"Référence: "+this.props.data.matRef}</Text>
         <Text>{"Equipement: "+this.props.data.matLibelle}</Text>
         <Text>{"Statut: "+this.props.data.sLocStatus}</Text>
-        <Text>{"Date de début de tâche: "+(this.props.data.heureDebut !== undefined ? this.props.data.heureDebut : "N/A")}</Text>
-        <Text>{"Date de fin de tâche: "+(this.props.data.heureFin !== undefined ? this.props.data.heureFin : "N/A")}</Text>
         <Text>{"Location chauffeur: "+(this.props.data.matChauffeur.trim() === "" ? "Sans chauffeur" : this.props.data.matChauffeur)}</Text>
         <Text>{"Client: "+this.props.data.cliRef}</Text>
         <View style={styles.button}>
@@ -244,7 +215,6 @@ class FilterMap extends React.Component {
       if(this.filterList[key]) delete this.filterList[key]
     }
     else Object.assign(this.filterList, {[key]: {value: value, operator: operator}})
-    //console.log(this.filterList)
   }
 
   render() {
@@ -335,7 +305,7 @@ export default class HomeMap extends React.Component {
         <Tab.Screen name="Details" component={Details} options={{
           tabBarLabel: 'Details',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="tune" color={color} size={26} />
+            <MaterialCommunityIcons name="information" color={color} size={26} />
           ),
         }}/>
         <Tab.Screen name="Filter" component={FilterMap} options={{

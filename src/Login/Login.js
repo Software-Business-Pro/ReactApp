@@ -68,9 +68,6 @@ export default class Login extends React.Component {
               placeholderTextColor="#003f5c"
               onChangeText={text => this.setState({password:text})}/>
           </View>
-          <TouchableOpacity>
-            <Text style={styles.forgot}>Mot de passe oublié ?</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.loginBtn} onPress={this.Login} >
             <Text style={styles.loginText}>Connexion</Text>
           </TouchableOpacity>
