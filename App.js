@@ -8,7 +8,7 @@ import {
   DrawerItemList,
   DrawerItem,
 } from '@react-navigation/drawer';
-import Ocr from './src/Ocr/Ocr';
+import MyStack from './src/Ocr/Ocr';
 import HomeMap from './src/Map/Map';
 import HomeScreen from './src/HomeScreen/HomeScreen';
 import Pickertest from './src/Picker/Picker';
@@ -76,7 +76,7 @@ function MyDrawer(props) {
               color={focused ? color : '#ccc'}
             />
           )}}/>
-      <Drawer.Screen name="Détéction de plaque"  component={Ocr} options={{drawerIcon: ({focused, size, color}) => (
+      <Drawer.Screen name="Détéction de plaque"  component={MyStack} options={{drawerIcon: ({focused, size, color}) => (
             <MaterialCommunityIcons 
               name={focused ? "camera" : "camera-outline"}
               size={size}

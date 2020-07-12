@@ -1,16 +1,124 @@
-import * as React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React from "react";
+import {
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  View,
+  TouchableOpacity,
+  Image
+} from "react-native";
+
 import { RNCamera } from 'react-native-camera';
 import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Toast } from "native-base";
 import {PermissionsAndroid} from 'react-native';
 import RNTextDetector from "react-native-text-detector";
 import Dimensions from './Dimensions';
+import Api from "../ApiData/ApiData";
+import { createStackNavigator } from '@react-navigation/stack';
 
-export default class Ocr extends React.Component {
+const Stack = createStackNavigator();
+
+export default function MyStack() {
+  return (
+    <Stack.Navigator headerMode={"none"}>
+      <Stack.Screen name="Camera" component={Ocr} />
+      <Stack.Screen name="Infos" component={Infos}/>
+    </Stack.Navigator>
+  );
+}
+
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
+
+export function Infos(props) {
+  let vehicle = {}
+  let text = null
+  let infos = null
+  if(props.route.params && props.route.params.vehicle && props.route.params.vehicle[0]) vehicle = props.route.params.vehicle[0]
+  if(props.route.params && props.route.params.text && props.route.params.text[0].text) text = props.route.params.text[0].text
+  console.log("---------------------test----------------------")
+  console.log(vehicle)
+  console.log("--------------------------------------")
+  if(!isEmpty(vehicle)) {
+    
+  infos = ( <View style={{padding: 8, paddingTop: 20}}><Text style={{fontWeight: "bold", fontSize: 15}}>Informations du véhicule({props.route.params.text}):</Text>
+            <Text>{"\n"}</Text>
+            <Text>Référence: {vehicle.matRef}</Text>
+            <Text>Equipement: {vehicle.matLibelle}</Text>
+            <Text>Statut: {vehicle.sLocStatus}</Text>
+            <Text>Numéro de série: {vehicle.matNumSerie}</Text>
+            <Text>Plaque d'immatriculation: {vehicle.matImatriculation}</Text>
+            <Text>Longueur du véhicule: {vehicle.matLongueur}</Text>
+            <Text>Largeur du véhicule: {vehicle.matLargeur}</Text>
+            <Text>Hauteur du véhicule: {vehicle.matHauteur}</Text>
+            <Text>Poid du véhicule: {vehicle.matPoids}</Text>
+            <Text>Remarque: {vehicle.remarque}</Text></View>
+          )
+  }
+  else {
+    infos = (
+      <View style={{padding: 8, paddingTop: 20}}>
+        <Text style={{fontSize: 14}}>Aucun véhicule ne comporte la plaque d'immatriculation: {props.route.params.text}</Text>
+      </View>
+    )
+  }
+  return (
+    <Container>
+    <Header>
+    <Left>
+      <Button
+        transparent
+        onPress={() => props.navigation.openDrawer()}>
+        <Icon name="menu" />
+      </Button>
+    </Left>
+    <Body>
+      <Title>Informations véhicule</Title>
+    </Body>
+    <Right />
+  </Header>
+  <Content>
+  <View>
+    {infos}
+    </View>
+    <View style={style.buttonInfos}>
+      <Button primary rounded success title="back" onPress={() => props.navigation.goBack()}>
+          <Text style={{color: "white", textAlign: "center", width: 100}}>Revenir</Text>
+      </Button>
+    </View>
+  </Content>
+  </Container>
+      
+  )
+}
+
+export class Ocr extends React.Component {
 
     constructor(props) {
       super(props);
-      this.state = {textDetected: null};
+      this.state = {textDetected: null, theVechicle: null};
+      this.vehicles = {}
+  }
+
+  async componentDidMount() {
+    this.vehicles = await (await Api.GetVehiclesDetails()).data;
+  }
+
+  findVehiclesByImmat(arrayText) {
+    let res = []
+    let text = ""
+    if(arrayText[0]) {
+      res= this.vehicles.filter(v => v.matImatriculation === arrayText[0].text)
+      text = arrayText[0].text
+    }
+    //this.setState({textDetected: arrayText, theVechicle: res})
+    //console.log(res)
+    this.props.navigation.navigate('Infos', {
+      vehicle: res,
+      text: text
+   });
+
   }
 
   requestRWPermissions = async () => {
@@ -61,8 +169,8 @@ export default class Ocr extends React.Component {
     //uri = uri.replace('file://', '');
     const visionResp = await RNTextDetector.detectFromUri(uri);
     console.log('visionResp', visionResp);
-    if(visionResp !== []) this.setState({textDetected: visionResp});
-    else this.setState({textDetected: [{text: ""}]});
+    this.findVehiclesByImmat(visionResp)
+    
   }
 
   displayText(tabText) {
@@ -82,7 +190,7 @@ export default class Ocr extends React.Component {
       duration: 5000,
       position: "top"
     })*/
-    if(this.state.textDetected) alert(this.displayText(textDetected));
+    //if(this.state.textDetected) alert(this.displayText(textDetected));
     return (
     <Container>
       <Header>
@@ -94,7 +202,7 @@ export default class Ocr extends React.Component {
         </Button>
       </Left>
       <Body>
-        <Title>{this.props.route.name}</Title>
+        <Title>Détéction de plaque</Title>
       </Body>
       <Right />
     </Header>
@@ -154,4 +262,13 @@ const style = StyleSheet.create({
     borderWidth: 4,
     borderColor: "#000000"
   },
+  buttonInfos: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 20,
+    paddingBottom: 5
+  },
 });
+
