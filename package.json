@@ -27,6 +27,7 @@
     "native-base": "^2.13.12",
     "react": "16.11.0",
     "react-native": "0.62.2",
+    "react-native-calendars": "^1.300.0",
     "react-native-camera": "^3.24.2",
     "react-native-config": "^1.0.0",
     "react-native-gesture-handler": "^1.6.1",
@@ -38,6 +39,7 @@
     "react-native-screens": "^2.7.0",
     "react-native-tesseract-ocr": "^1.0.10",
     "react-native-text-detector": "^0.0.6",
+    "react-native-week-view": "0.0.13",
     "react-navigation": "^4.3.9",
     "react-router-native": "^5.2.0",
     "react-xml-parser": "^1.1.6"

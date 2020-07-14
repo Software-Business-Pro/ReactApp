@@ -150,7 +150,7 @@ export class CustomMarker extends Component {
     return (
       <Marker key={this.state.heureDebut && this.props.id } coordinate = {{latitude: Number(this.props.data.dLocLati), longitude: Number(this.props.data.dLocLongi)}}
         planning={this.state.heureDebut}    
-        pinColor = {!this.props.data.heureDebut ? "red" : "green"}
+        pinColor = {this.props.data.isDisponible ? "green" : "red"}
         ref={ref => { this.marker = ref; }}
         tracksViewChanges={true}
         onCalloutPress={() => {this.getData()}

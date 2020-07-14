@@ -10,7 +10,6 @@ import {
 } from '@react-navigation/drawer';
 import MyStack from './src/Ocr/Ocr';
 import HomeMap from './src/Map/Map';
-import HomeScreen from './src/HomeScreen/HomeScreen';
 import Pickertest from './src/Picker/Picker';
 import Config from "react-native-config";
 import Animated from 'react-native-reanimated';
