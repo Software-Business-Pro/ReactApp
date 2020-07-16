@@ -1,15 +1,7 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  View,
-  TouchableOpacity,
-  Image
-} from "react-native";
-
+import {StyleSheet, Text, View, TouchableOpacity} from "react-native";
 import { RNCamera } from 'react-native-camera';
-import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Toast } from "native-base";
+import { Container, Header, Title, Left, Icon, Right, Button, Body, Content } from "native-base";
 import {PermissionsAndroid} from 'react-native';
 import RNTextDetector from "react-native-text-detector";
 import Dimensions from './Dimensions';
@@ -30,16 +22,14 @@ export default function MyStack() {
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
 }
-
+// Component for displaying infos when immatriculation match
 export function Infos(props) {
   let vehicle = {}
   let text = null
   let infos = null
   if(props.route.params && props.route.params.vehicle && props.route.params.vehicle[0]) vehicle = props.route.params.vehicle[0]
   if(props.route.params && props.route.params.text && props.route.params.text[0].text) text = props.route.params.text[0].text
-  console.log("---------------------test----------------------")
-  console.log(vehicle)
-  console.log("--------------------------------------")
+
   if(!isEmpty(vehicle)) {
     
   infos = ( <View style={{padding: 8, paddingTop: 20}}><Text style={{fontWeight: "bold", fontSize: 15}}>Informations du véhicule({props.route.params.text}):</Text>
@@ -94,17 +84,15 @@ export function Infos(props) {
 }
 
 export class Ocr extends React.Component {
-
     constructor(props) {
       super(props);
-      this.state = {textDetected: null, theVechicle: null};
       this.vehicles = {}
   }
 
   async componentDidMount() {
     this.vehicles = await (await Api.GetVehiclesDetails()).data;
   }
-
+  // Take an immat and return a vehicle with this immat
   findVehiclesByImmat(arrayText) {
     let res = []
     let text = ""
@@ -112,15 +100,13 @@ export class Ocr extends React.Component {
       res= this.vehicles.filter(v => v.matImatriculation === arrayText[0].text)
       text = arrayText[0].text
     }
-    //this.setState({textDetected: arrayText, theVechicle: res})
-    //console.log(res)
     this.props.navigation.navigate('Infos', {
       vehicle: res,
       text: text
    });
 
   }
-
+  // Permission for read and write storage
   requestRWPermissions = async () => {
     const checkReadExternalStorage = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
     const checkWriteExternalStorage = PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
@@ -153,24 +139,18 @@ export class Ocr extends React.Component {
         }
     }
 };
-
+  // Taking picture with camera
   takePicture = async () => {
     if (this.camera) {
-      //const options = { quality: 0.5, base64: true };
       const data = await this.camera.takePictureAsync();
-      console.log(data.uri);
       this.detectText(data.uri);
     }
   };
-
+  // Detect text with tesseract
   detectText = async (uri) =>
   {
-    console.log('OK !!');
-    //uri = uri.replace('file://', '');
     const visionResp = await RNTextDetector.detectFromUri(uri);
-    console.log('visionResp', visionResp);
     this.findVehiclesByImmat(visionResp)
-    
   }
 
   displayText(tabText) {
@@ -182,15 +162,6 @@ export class Ocr extends React.Component {
   }
 
   render() {
-    const {textDetected} = this.state;
-    console.log(textDetected);
-    /*Toast.show({
-      text: textDetected.shift().text,
-      buttonText: "Go",
-      duration: 5000,
-      position: "top"
-    })*/
-    //if(this.state.textDetected) alert(this.displayText(textDetected));
     return (
     <Container>
       <Header>

@@ -38,27 +38,6 @@ class ApiData {
     return res;
   }
 
-  // Methode trop longue =>  abandonnée
-  async linkPlanning(allLinkedVehicles) {
-    let dateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset()*60*1000).toISOString().substr(0,19).replace('T', ' ');
-    let date = dateTime.split(' ')[0]
-    let time = dateTime.split(' ')[1].split(':').slice(0,-1).join('h')
-    let i = 0
-    for(const v of allLinkedVehicles) {
-      let planning = await this.getVehiclePlanning(v.sName);
-      if(planning.data) {
-        for(const p of planning.data) {
-          if(date === p.date.split('T'[0]) && (time >= p.heureDebut && time < p.heureFin)) {
-            Object.assign(v, {heureDebut: p.heureDebut.replace("h",":"), heureFin: p.heureFin.replace("h",":")})
-            i++
-          }
-        }
-      }
-    }
-    console.log("Longueur :"+i)
-    return allLinkedVehicles;
-  }
-
   async getAllData() {
     // Ask for session
     const resSession = await this.getSession();
@@ -159,8 +138,8 @@ class ApiData {
         xmls,
         {headers:
               {
-                  'Content-Type': 'text/xml; charset=utf-8',
-                  SOAPAction: 'http://tempuri.org/GetResources'
+                'Content-Type': 'text/xml; charset=utf-8',
+                SOAPAction: 'http://tempuri.org/GetResources'
               }
         }).then(res=>{
           return res.data;
@@ -176,6 +155,11 @@ class ApiData {
 
   async getVehiclePlanning(id) {
     return axios.get('https://sbpesgi.azurewebsites.net//Api/SBP/Planning/'+id)
+ }
+
+ async GetVehiclesPhotos(id) {
+  return axios.get("https://sbpesgi.azurewebsites.net/Api/SBP/Image/"+id)
+  
  }
 
 }

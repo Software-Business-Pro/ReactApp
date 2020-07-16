@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { firebase } from '@react-native-firebase/auth';
-import { NativeRouter, Route, Link, Redirect } from "react-router-native";
-import { Container, Body, Content,Toast } from "native-base";
+import { Redirect } from "react-router-native";
+import { Container,Toast } from "native-base";
 
 export default class Login extends React.Component {
   constructor(props) {
@@ -14,7 +14,7 @@ export default class Login extends React.Component {
       error: null
     }
   }
-
+  // Handle firebase login
   Login = (event) => {
     if(this.state.email.trim() !== '' && this.state.password.trim() !== '')
     {
@@ -23,10 +23,8 @@ export default class Login extends React.Component {
         .signInWithEmailAndPassword(this.state.email, this.state.password)
         .then(user => {
           this.setState({ user });
-          //console.log(user);
         })
         .catch(error => {
-          console.log(error)
           this.setState({ error });
         });
       }
@@ -37,13 +35,11 @@ export default class Login extends React.Component {
   };
 
   render(){
-    //props.location.state.logout && this.setState({user: null})
-    console.log(this.state.user)
       if(this.state.error) {
         Toast.show({
           text: this.state.error.toString(),
           buttonText: "OK",
-          duration: 8000,
+          duration: 5000,
           position: "bottom",
           type: "danger"
         })

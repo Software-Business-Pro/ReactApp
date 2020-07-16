@@ -1,5 +1,5 @@
 import WeekView from 'react-native-week-view';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,19 +13,18 @@ export default class Planning extends React.Component {
           };
     }
  
-
+// Take a ISOSDate string and return a date object
 parseISOString(s) {
     var b = s.split(/\D+/);
     return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
 }
-  
+// Generate a datetime object by string date and string hour
 generateDates = (date, heure) => {
     const dater = this.parseISOString(date+"Z")
-    //console.log(Number(heure.split(':')[0]))
     dater.setHours(Number(heure.split(':')[0]), Number(heure.split(':')[1]), 0)
     return dater;
 }
-
+// Specific is empty string
 isEmpty(s) {
     if(s === "" || s === "N/A") return true
     else return false
@@ -36,6 +35,7 @@ isEmptyObject(obj) {
   }
 
 render() { 
+    // Generate a tab of object for the vehicle's planning
     let planning = []   
     if(!this.isEmptyObject(this.props.planning)) {
         let i = 0
@@ -52,10 +52,8 @@ render() {
                 i+=2
             }
         }
-        
-    } else planning = [{id: 0}]
-    console.log(planning)
-    
+    }
+    else planning = [{id: 0}]
     return (
         <>
         <SafeAreaView style={styles.container}>
@@ -88,5 +86,3 @@ const styles = StyleSheet.create({
         backgroundColor: '#4286f4',
     },
   });
-
-  

@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import { Button, Toast } from "native-base";
-
+import Api from '../ApiData/ApiData'
 
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
@@ -14,9 +14,26 @@ export default class MyPicker extends React.Component {
     this.state = {
       filePath: {},
       imageChose: false,
-      successUpload: null
+      successUpload: null,
+      photos: {}
     };
   }
+
+  // Display vehicle's photos
+  displayPhotos() {
+    let res = []
+    let i = 0
+    let photos = {}
+    if(!isEmpty(this.state.photos)) photos = this.state.photos
+    else photos = this.props.photos
+    res = photos.map(p => <Image key={i++} style={{width: 100, height: 100}} source={{
+      uri: p.lienImage,
+    }}/>)
+    this.state.photos = {}
+    this.state.successUpload = null
+    return res
+  }
+  // Allow to choose a picture from gallery or take one
   chooseFile = () => {
     var options = {
       title: 'Sélectionez une image',
@@ -46,7 +63,8 @@ export default class MyPicker extends React.Component {
     });
   };
 
-  sendImage() {
+  // Send image to the vehicles database via our api
+   sendImage() {
     if(!isEmpty(this.props.idV)) {
       var file = {
         uri: this.state.filePath.uri,
@@ -60,8 +78,10 @@ export default class MyPicker extends React.Component {
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = () => {
         if (xhr.readyState == XMLHttpRequest.DONE) {
-            console.log("ok")
-            this.setState({successUpload: true})
+          Api.GetVehiclesPhotos(this.props.idV).then(res => {
+            const photos = res.data;
+            this.setState({photos, successUpload: true, imageChose: false, filePath: {}})
+          })
         }
     }
       xhr.open('POST', "https://sbpesgi.azurewebsites.net/Api/SBP/Image/"+this.props.idV);
@@ -70,7 +90,6 @@ export default class MyPicker extends React.Component {
   }
 
   render() {
-    console.log("test: "+this.state.successUpload)
     if(this.state.successUpload !== null)
       if(this.state.successUpload) {
         Toast.show({
@@ -91,20 +110,27 @@ export default class MyPicker extends React.Component {
         })
       }
     return (
-          <View style={styles.container}>
-              {!isEmpty(this.state.filePath) && <Image
-                  source={{ uri: this.state.filePath.uri }}
-                  style={{ width: 250, height: 250 }}
-              />}
-              <Text style={{ alignItems: 'center' }}>
-              </Text>
-              <Button rounded title="Choose File" onPress={this.chooseFile.bind(this)} style={{marginBottom: 10}}>
-                  <Text style={{color: "white", textAlign: "center", fontSize: 15, width: 135}}>Choisir la photo</Text>
-              </Button>
-              {this.state.imageChose && (<Button primary rounded success title="Send File" onPress={() => this.sendImage()}>
-                  <Text style={{color: "white", textAlign: "center", fontSize: 15, width: 135}}>Envoyer la photo</Text>
-              </Button>)}
-          </View>
+      <>
+        <View style={styles.container}>
+            {!isEmpty(this.state.filePath) && !this.state.successUpload && <Image
+                source={{ uri: this.state.filePath.uri }}
+                style={{ width: 250, height: 250 }}
+            />}
+            <Text style={{ alignItems: 'center' }}>
+            </Text>
+            <Button rounded title="Choose File" onPress={this.chooseFile.bind(this)} style={{marginBottom: 10}}>
+                <Text style={{color: "white", textAlign: "center", fontSize: 15, width: 135}}>Choisir la photo</Text>
+            </Button>
+            {this.state.imageChose && !this.state.successUpload && (<Button primary rounded success title="Send File" onPress={() => this.sendImage()}>
+                <Text style={{color: "white", textAlign: "center", fontSize: 15, width: 135}}>Envoyer la photo</Text>
+            </Button>)}
+            <Text>{"\n"}</Text>
+        </View>
+        <View style={{flex: 1}}>
+        <Text style={{fontWeight: "bold", fontSize: 15}}>Gallerie: </Text>
+        {this.displayPhotos()}
+        </View>
+      </>
     );
   }
 }

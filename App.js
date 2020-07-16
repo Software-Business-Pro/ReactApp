@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { View, Text, Image, useWindowDimensions  } from 'react-native';
+import { useWindowDimensions  } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { Root, Icon } from "native-base";
+import { Root } from "native-base";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -10,11 +10,10 @@ import {
 } from '@react-navigation/drawer';
 import MyStack from './src/Ocr/Ocr';
 import HomeMap from './src/Map/Map';
-import Pickertest from './src/Picker/Picker';
 import Config from "react-native-config";
 import Animated from 'react-native-reanimated';
 import Login from './src/Login/Login'
-import { NativeRouter, Route, Redirect, Link, useHistory } from "react-router-native";
+import { NativeRouter, Route, Redirect, useHistory } from "react-router-native";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Details from './src/Map/Details';
 
@@ -23,6 +22,7 @@ function CustomDrawerContent({ progress, ...rest }) {
     inputRange: [0, 1],
     outputRange: [-100, 0]
   });
+
   let history = useHistory();
   return (
     <DrawerContentScrollView {...rest}>
@@ -38,11 +38,11 @@ function CustomDrawerContent({ progress, ...rest }) {
     </DrawerContentScrollView>
   );
 }
-const Drawer = createDrawerNavigator();
 
+const Drawer = createDrawerNavigator();
+// App menu
 function MyDrawer(props) {
   const dimensions = useWindowDimensions();
-  const isLargeScreen = dimensions.width >= 768;
   
   return (
     <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} drawerStyle={{

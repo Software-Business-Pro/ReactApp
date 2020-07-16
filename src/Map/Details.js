@@ -1,24 +1,21 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, Picker } from 'react-native';
-import { Container, Header, Title, Left, Icon, Right, Button, Body, Content, Card, CardItem, Form, Item } from "native-base";
-import { NativeRouter, Route, Redirect, Link, useHistory, withRouter  } from "react-router-native";
+import { StyleSheet, Text, View} from 'react-native';
+import { Container, Header, Title, Left, Icon, Right, Button, Body, Content} from "native-base";
 import MyPicker from '../Picker/Picker'
 import Planning from '../Planning/Planning'
 
 export default function Details(props) {
-    let dateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset()*60*1000).toISOString().substr(0,19).replace('T', ' ');
-    let date = dateTime.split(' ')[0]
     let data = {}
     let planning = {}
-    let planningToday = {}
-    let picker = true
+    let photos = {}
     if(props.route.params && props.route.params.planning) planning = props.route.params.planning
     if(props.route.params && props.route.params.data) data = props.route.params.data
+    if(props.route.params && props.route.params.photos) photos = props.route.params.photos
 
     function isEmpty(obj) {
         return Object.keys(obj).length === 0;
     }
-
+    // Display all the details page of the vehicle
     function displayVehicleDetails() {
         let details = []
         if(!isEmpty(data)) {
@@ -32,22 +29,22 @@ export default function Details(props) {
                 <Text>Compteur kilométrique du véhicule en KM: {data.dKM}</Text>,
                 <Text>Date de début de validité du véhicule: {data.dtValidStart}</Text>,
                 <Text>Date de fin de validité du véhicule: {data.dtValidEnd}</Text>,
+                <Text>Numéro de série: {data.matNumSerie}</Text>,
                 <Text>Longueur du véhicule: {data.matLongueur}</Text>,
                 <Text>Largeur du véhicule: {data.matLargeur}</Text>,
                 <Text>Hauteur du véhicule: {data.matHauteur}</Text>,
                 <Text>Poid du véhicule: {data.matPoids}</Text>,
                 <Text>Remarque: {data.remarque}</Text>
-                )
+            )
             details.push(<Text>{"\n"}</Text>)
             details.push(<Text style={{fontWeight: "bold", fontSize: 15}}>Planning: </Text>)
             details.push(<Text>{"\n"}</Text>)
             details.push(<Planning planning={planning}/>)
             details.push(<Text>{"\n"}</Text>)
             details.push(<Text style={{fontWeight: "bold", fontSize: 15}}>Envoyer une photo:</Text>)
-            details.push(<MyPicker idV={data.matRef}/>)
+            details.push(<MyPicker idV={data.matRef} photos={photos}/>)
         } else {
             details.push(<View style={{alignItems: 'center'}}><Text style={{fontSize: 15}}>Aucun véhicule sélectionné</Text></View>)
-            picker = false
         }
         return details
     }
@@ -63,7 +60,7 @@ export default function Details(props) {
             </Button>
             </Left>
             <Body>
-            <Title>Details</Title>
+            <Title>Véhicule</Title>
             </Body>
         <Right />
       </Header>
